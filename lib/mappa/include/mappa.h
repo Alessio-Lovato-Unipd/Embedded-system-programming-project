@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <string>
+#include <fstream>
 
 using std::map;
 using std::pair;
@@ -30,6 +32,7 @@ class ostacolo {
     ostacolo(int x1, int y1, int x2, int y2);
     const posizione posizione_minima() {return pos_minima_;};
     const posizione posizione_massima() {return pos_massima_;};
+    bool operator<(ostacolo &da_confrontare) {return pos_massima_ < da_confrontare.posizione_massima();};
 
     private:
     posizione pos_minima_, pos_massima_;
@@ -38,11 +41,13 @@ class ostacolo {
 //classe che definisce l'intera mappa
 class mappa {
     public:
-    mappa(vector<ostacolo> ostacoli_non_ordinati);
-    mappa(vector<ostacolo> ostacoli_non_ordinati, float dimensione_celle);
+    mappa(const vector<ostacolo> &ostacoli_non_ordinati);
+    //mappa(vector<ostacolo> ostacoli_non_ordinati, float dimensione_celle);
+    const posizione posizione_minima() {return minimo_mappa_;};
+    const posizione posizione_massima() {return massimo_mappa_;};
     void rendi_cella_ostacolo(posizione pos) {spazio_movimento_[pos] = false;};
     void rendi_cella_libera(posizione pos) {spazio_movimento_[pos] = true;};
-    void stampa_mappa();
+    //void stampa_mappa();
 
     private:
     vector<ostacolo> ostacoli;
@@ -52,5 +57,7 @@ class mappa {
     map<posizione, bool> spazio_movimento_; //se booleano==false contiene robot o ostacolo
     void inserisci_celle(const posizione &minimo, const posizione &massimo, bool ostacolo);
 };
+
+int conta_ostacoli_da_file(std::ifstream &file);
 
 #endif

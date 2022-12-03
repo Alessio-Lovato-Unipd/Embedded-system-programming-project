@@ -1,14 +1,14 @@
 #include "mappa.h"
 
 ostacolo::ostacolo(int x1, int y1, int x2, int y2) {
-    auto x{std::minmax(x1,x2)};
+    auto x{std::minmax(x1, x2)};
     auto y{std::minmax(y1, y2)};
     pos_minima_ = std::make_pair(x.first,y.first);
-    pos_massima_ = pos_minima_ = std::make_pair(x.second,y.second);
+    pos_massima_ = std::make_pair(x.second,y.second);
 }
 
 
-mappa::mappa(vector<ostacolo> ostacoli_non_ordinati)
+mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
 : ostacoli{ostacoli_non_ordinati} {
     ostacoli.shrink_to_fit();
     //ordino il vettore di ostacoli in modo da trovare le dimensioni della mappa più velocemtnte
@@ -41,4 +41,12 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo, b
         casella_corrente.first++;
         casella_corrente.second = minimo.second;
     }
+}
+
+int conta_ostacoli_da_file(std::ifstream &file){
+    std::string linea;
+    int righe{0};
+    while(getline(file, linea))
+        righe++;
+    return righe;
 }

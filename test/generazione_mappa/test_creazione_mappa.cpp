@@ -54,14 +54,16 @@ int main(int argc, char *argv[]) {
     crea_vettore_ostacoli(argv[1], ostacoli);
 
     //mappa
-    //mappa griglia{ostacoli};
+    mappa griglia{ostacoli};
+    griglia.stampa_ostacoli();
 
     //stampo il vettore di ostacoli
-    std::sort(ostacoli.begin(), ostacoli.end());
-    for (auto elemento : ostacoli)
-      cout << "x1: " << elemento.posizione_minima().first <<"  y1: " << elemento.posizione_minima().second
-           <<"  x2: " << elemento.posizione_massima().first <<"  y2: " << elemento.posizione_massima().second <<endl;
-    cout << endl;
+    //std::sort(ostacoli.begin(), ostacoli.end());
+    stampa_vettore_ostacoli(ostacoli);
+
+    //stampa dimensioni griglia
+    cout << "Minimo grigia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl
+    << "Massimo grigia--> x: " << griglia.posizione_massima().first << "  y: " << griglia.posizione_massima().second << endl;
   }
     return 0;
 }

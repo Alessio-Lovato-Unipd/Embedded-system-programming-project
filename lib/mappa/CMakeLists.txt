@@ -10,7 +10,7 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 ##########################################################################
 ##########################################################################
 
-add_library(mappa STATIC src/mappa.c)
+add_library(mappa STATIC src/mappa.cpp)
 
 target_include_directories(mappa PRIVATE include)
 

@@ -11,8 +11,7 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 
 #Aggiunta sottocartelle dei test
 
-add_executable(creazione test_creazione_mappa.cpp)
-target_link_libraries(creazione PRIVATE mappa)
+add_subdirectory(generazione_mappa)
 
 
 

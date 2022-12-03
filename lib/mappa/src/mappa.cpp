@@ -11,7 +11,7 @@ ostacolo::ostacolo(int x1, int y1, int x2, int y2) {
 mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
 : ostacoli{ostacoli_non_ordinati} {
     ostacoli.shrink_to_fit();
-   
+    std::sort(ostacoli.begin(), ostacoli.end());
     //incremento i valori per avere dimensioni maggiori nel caso avessi ostacoli alle estremità
     
    minimo_mappa_ = {(min_element(ostacoli.begin(), ostacoli.end(), 
@@ -36,7 +36,7 @@ mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
     for (auto el : ostacoli) {
         inserisci_celle(el.posizione_minima(), el.posizione_massima(), true);
     }
-    
+
 }
 
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo, bool ostacolo) {

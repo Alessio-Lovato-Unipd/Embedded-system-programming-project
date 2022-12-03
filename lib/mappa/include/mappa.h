@@ -58,6 +58,7 @@ class mappa {
     //stampo una matrice contenete 0 se non ho ostacoli e 1 se li ha,
     //inoltre ai lati sono presenti delle cornici per identificare la posizione delle celle
     void stampa_mappa(std::string filename);
+    bool ostacolo_in_posizione(const posizione &pos) {return spazio_movimento_.find(pos)->second;};
 
     private:
     vector<ostacolo> ostacoli;

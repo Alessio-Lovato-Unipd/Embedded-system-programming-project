@@ -11,23 +11,32 @@ ostacolo::ostacolo(int x1, int y1, int x2, int y2) {
 mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
 : ostacoli{ostacoli_non_ordinati} {
     ostacoli.shrink_to_fit();
-    //ordino il vettore di ostacoli in modo da trovare le dimensioni della mappa più velocemtnte
-    std::sort(ostacoli.begin(), ostacoli.end());
+   
     //incremento i valori per avere dimensioni maggiori nel caso avessi ostacoli alle estremità
-    const posizione minimo_mappa_{ostacoli.begin()->posizione_minima().first - incremento_mappa,
-                                    ostacoli.begin()->posizione_minima().second - incremento_mappa};
     
-    const posizione massimo_mappa_{ostacoli.begin()->posizione_massima().first + incremento_mappa,
-                                    ostacoli.begin()->posizione_massima().second + incremento_mappa};
+   minimo_mappa_ = {(min_element(ostacoli.begin(), ostacoli.end(), 
+                                  [](auto &lhs, auto &rhs) { return lhs.posizione_minima().first < rhs.posizione_minima().first; }))->posizione_minima().first
+                                  -incremento_mappa,
 
+                                  (min_element(ostacoli.begin(), ostacoli.end(), 
+                                  [](auto lhs, auto rhs) { return lhs.posizione_minima().second < rhs.posizione_minima().second; }))->posizione_minima().second
+                                  - incremento_mappa};
+    
+   massimo_mappa_ = {(max_element(ostacoli.begin(), ostacoli.end(), 
+                                  [](auto lhs, auto rhs) { return lhs.posizione_massima().first < rhs.posizione_massima().first; }))->posizione_massima().first
+                                  + incremento_mappa,
+
+                                  (max_element(ostacoli.begin(), ostacoli.end(), 
+                                  [](auto lhs, auto rhs) { return lhs.posizione_massima().second < rhs.posizione_massima().second; }))->posizione_massima().second
+                                  + incremento_mappa};
+ 
     //creo la mappa 
     inserisci_celle(massimo_mappa_, minimo_mappa_, false);
     //inserisco gli ostacoli nella mappa
     for (auto el : ostacoli) {
         inserisci_celle(el.posizione_minima(), el.posizione_massima(), true);
     }
-
-
+    
 }
 
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo, bool ostacolo) {
@@ -49,4 +58,11 @@ int conta_ostacoli_da_file(std::ifstream &file){
     while(getline(file, linea))
         righe++;
     return righe;
+}
+
+void stampa_vettore_ostacoli(const vector<ostacolo> &ostacoli) {
+      for (auto elemento : ostacoli)
+      cout << "x1: " << elemento.posizione_minima().first <<"  y1: " << elemento.posizione_minima().second
+           <<"  x2: " << elemento.posizione_massima().first <<"  y2: " << elemento.posizione_massima().second <<endl;
+    cout << endl;
 }

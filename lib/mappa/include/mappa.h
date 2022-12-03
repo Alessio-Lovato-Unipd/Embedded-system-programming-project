@@ -6,10 +6,13 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 using std::map;
 using std::pair;
 using std::vector;
+using std::cout;
+using std::endl;
 typedef pair<int, int> posizione; // corrisponderà a (x,y)
 
 const int incremento_mappa = 10;
@@ -38,6 +41,10 @@ class ostacolo {
     posizione pos_minima_, pos_massima_;
 };
 
+int conta_ostacoli_da_file(std::ifstream &file);
+
+void stampa_vettore_ostacoli(const vector<ostacolo> &ostacoli);
+
 //classe che definisce l'intera mappa
 class mappa {
     public:
@@ -47,6 +54,7 @@ class mappa {
     const posizione posizione_massima() {return massimo_mappa_;};
     void rendi_cella_ostacolo(posizione pos) {spazio_movimento_[pos] = false;};
     void rendi_cella_libera(posizione pos) {spazio_movimento_[pos] = true;};
+    void stampa_ostacoli(){stampa_vettore_ostacoli(ostacoli);};
     //void stampa_mappa();
 
     private:
@@ -58,6 +66,5 @@ class mappa {
     void inserisci_celle(const posizione &minimo, const posizione &massimo, bool ostacolo);
 };
 
-int conta_ostacoli_da_file(std::ifstream &file);
 
 #endif

@@ -8,6 +8,22 @@ ostacolo::ostacolo(int x1, int y1, int x2, int y2) {
 }
 
 
+int conta_ostacoli_da_file(std::ifstream &file){
+    std::string linea;
+    int righe{0};
+    while(getline(file, linea))
+        righe++;
+    return righe;
+}
+
+void stampa_vettore_ostacoli(const vector<ostacolo> &ostacoli) {
+      for (auto elemento : ostacoli)
+      cout << "x1: " << elemento.posizione_minima().first <<"  y1: " << elemento.posizione_minima().second
+           <<"  x2: " << elemento.posizione_massima().first <<"  y2: " << elemento.posizione_massima().second <<endl;
+    cout << endl;
+}
+
+
 mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
 : ostacoli{ostacoli_non_ordinati} {
     ostacoli.shrink_to_fit();
@@ -32,6 +48,7 @@ mappa::mappa(const vector<ostacolo> &ostacoli_non_ordinati)
  
     //creo la mappa 
     inserisci_celle(massimo_mappa_, minimo_mappa_, false);
+
     //inserisco gli ostacoli nella mappa
     for (auto el : ostacoli) {
         inserisci_celle(el.posizione_minima(), el.posizione_massima(), true);
@@ -52,17 +69,30 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo, b
     }
 }
 
-int conta_ostacoli_da_file(std::ifstream &file){
-    std::string linea;
-    int righe{0};
-    while(getline(file, linea))
-        righe++;
-    return righe;
-}
+void mappa::stampa_mappa(std::string filename) {
+    std::ofstream file(filename, std::ios::out);
+    if (!file.is_open()) {
+        std::cerr << "Impossibile stampare mappa, il file non è presente!" << std::endl;
+        return;
+        }
+    //inizio legenda superiore
+    //file << posizione_minima().first << "\t<-  " << posizione_massima().second << endl;
 
-void stampa_vettore_ostacoli(const vector<ostacolo> &ostacoli) {
-      for (auto elemento : ostacoli)
-      cout << "x1: " << elemento.posizione_minima().first <<"  y1: " << elemento.posizione_minima().second
-           <<"  x2: " << elemento.posizione_massima().first <<"  y2: " << elemento.posizione_massima().second <<endl;
-    cout << endl;
+    //ciclo stampa valori
+    // 0 -> no ostacoli
+    // 1 -> ostacoli
+    posizione stampa{minimo_mappa_.first, massimo_mappa_.second};
+    while (stampa.second >= minimo_mappa_.second) {
+        while(stampa.first <= massimo_mappa_.first) {
+             if (spazio_movimento_.find(stampa)->second == true)
+                file << "1";
+            else
+                file << "0";
+            stampa.first++;
+        }
+        file << endl;
+        stampa.second--;
+        stampa.first = minimo_mappa_.first;
+    }
+    file.close();        
 }

@@ -15,7 +15,7 @@ using std::cout;
 using std::endl;
 typedef pair<int, int> posizione; // corrisponderà a (x,y)
 
-const int incremento_mappa = 10;
+const int incremento_mappa = 5;
 
 //classe che identifica uan posizione
 /*class posizione {
@@ -55,7 +55,9 @@ class mappa {
     void rendi_cella_ostacolo(posizione pos) {spazio_movimento_[pos] = false;};
     void rendi_cella_libera(posizione pos) {spazio_movimento_[pos] = true;};
     void stampa_ostacoli(){stampa_vettore_ostacoli(ostacoli);};
-    //void stampa_mappa();
+    //stampo una matrice contenete 0 se non ho ostacoli e 1 se li ha,
+    //inoltre ai lati sono presenti delle cornici per identificare la posizione delle celle
+    void stampa_mappa(std::string filename);
 
     private:
     vector<ostacolo> ostacoli;

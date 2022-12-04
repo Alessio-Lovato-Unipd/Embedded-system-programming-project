@@ -59,10 +59,17 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         //calcolo celle da inserire
         posizione x{std::minmax(x1,x2)};
         posizione y{std::minmax(y1,y2)};
+
+        //gestione della possibile incongruenza tra dimensione ostacolo e dimensione celle
+        posizione max{x.second, y.second};
+        modifica_ostacolo(max.first, false);
+        modifica_ostacolo(max.second, false);
+        posizione min{x.first, y.first};
+        modifica_ostacolo(min.first, true);
+        modifica_ostacolo(min.second, true);
         //mettendo un incremento della cella di dimensione/2 otteniamo che il fiperimento della posizione
         //coinciderà con la posizione in metri della cella
-        posizione min{x.first + (dimensione_celle_metri_/2), y.first + (dimensione_celle_metri_/2)};
-        posizione max{x.second, y.second};
+        min ={min.first + (dimensione_celle_metri_/2), min.first + (dimensione_celle_metri_/2)};
         for (auto pos = min; pos.first < max.first; pos.first += dimensione_celle_metri_) {
             while (pos.second < max.second) {
                 ostacoli.insert(pos);
@@ -81,13 +88,29 @@ void stampa_vettore_ostacoli(const set<posizione> &ostacoli) {
     cout << endl;
 }
 
-
-float arrotonda_valore(float numero, bool minimo) {
+float arrotonda_valore(float valore, bool minimo) {
     if (minimo)
-        numero = floor(numero);
+        valore = floor(valore);
     else
-        numero = ceil(numero);
-    return numero;
+        valore = ceil(valore);
+    return valore;
+}
+
+void  mappa::modifica_ostacolo (float &valore, bool minimo) {
+    if (fmod(valore, dimensione_celle_metri_) == 0.0)
+        return;
+    float limite{arrotonda_valore(valore, minimo)};
+    if (minimo) {
+        while(limite < valore)
+            limite += dimensione_celle_metri_;
+        limite -= dimensione_celle_metri_;
+    }
+    else {
+        while(limite > valore)
+            limite -= dimensione_celle_metri_;
+        limite += dimensione_celle_metri_;
+    }
+    valore = limite;
 }
 
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {

@@ -35,7 +35,7 @@ const float incremento_mappa = 2;
 
 void stampa_vettore_ostacoli(const set<posizione> &ostacoli);
 
-float arrotonda_valore(float numero, bool minimo);
+float arrotonda_valore(float valore, bool minimo);
 
 //classe che definisce l'intera mappa
 class mappa {
@@ -60,6 +60,7 @@ private:
     float dimensione_celle_metri_;
     map<posizione, bool> spazio_movimento_; //se booleano==false contiene robot o ostacolo
     void inserisci_celle(const posizione &minimo, const posizione &massimo);
+    void modifica_ostacolo (float &valore, bool minimo);
 };
 
 

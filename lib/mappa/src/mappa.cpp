@@ -16,6 +16,29 @@ int conta_ostacoli_da_file(std::ifstream &file){
     return righe;
 }
 
+void crea_vettore_ostacoli(string filename, vector<ostacolo> &vettore){
+    string line;
+    std::ifstream file(filename, std::ios::in);
+   
+    while (getline(file, line)) {
+        auto virgola{line.find(',')};
+        string x1 = line.substr(0, virgola);
+
+        auto virgola_successiva{line.find(',', virgola + 1)};
+		    string y1 = line.substr(virgola + 1, virgola_successiva);
+
+        virgola = line.find(',', virgola_successiva + 1);
+		    string x2 = line.substr(virgola_successiva + 1, virgola);
+
+        virgola_successiva = line.find(',', virgola + 1);
+		    string y2 = line.substr(virgola + 1, virgola_successiva);
+
+        vettore.push_back(ostacolo{stoi(x1), stoi(y1), stoi(x2), stoi(y2)});
+    }
+
+    file.close();
+}
+
 void stampa_vettore_ostacoli(const vector<ostacolo> &ostacoli) {
       for (auto elemento : ostacoli)
       cout << "x1: " << elemento.posizione_minima().first <<"  y1: " << elemento.posizione_minima().second
@@ -68,6 +91,7 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo, b
         casella_corrente.second = minimo.second;
     }
 }
+
 
 void mappa::stampa_mappa(std::string filename) {
     std::ofstream file(filename, std::ios::out);

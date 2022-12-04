@@ -7,30 +7,6 @@ using std::cerr;
 using std::string;
 using std::cout;
 
-
-void crea_vettore_ostacoli(string filename, vector<ostacolo> &vettore){
-    string line;
-    std::ifstream file(filename, std::ios::in);
-   
-    while (getline(file, line)) {
-        auto virgola{line.find(',')};
-        string x1 = line.substr(0, virgola);
-
-        auto virgola_successiva{line.find(',', virgola + 1)};
-		    string y1 = line.substr(virgola + 1, virgola_successiva);
-
-        virgola = line.find(',', virgola_successiva + 1);
-		    string x2 = line.substr(virgola_successiva + 1, virgola);
-
-        virgola_successiva = line.find(',', virgola + 1);
-		    string y2 = line.substr(virgola + 1, virgola_successiva);
-
-        vettore.push_back(ostacolo{stoi(x1), stoi(y1), stoi(x2), stoi(y2)});
-    }
-
-    file.close();
-}
-
 void stampa_gnuplot(mappa &map) {
     //stampa dei fati necessari per il grafico
     std::ofstream file("gnuplot_raw.dat", std::ios::out);

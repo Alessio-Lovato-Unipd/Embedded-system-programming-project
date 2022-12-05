@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  //controllo se
+  //controllo se la dimensione inserita è un float
   string dimensione{argv[3]};
   bool primo_punto{true};
  for (auto elemento : dimensione) {

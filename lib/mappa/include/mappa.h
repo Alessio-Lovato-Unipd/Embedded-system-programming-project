@@ -17,7 +17,9 @@ using std::cout;
 using std::endl;
 typedef pair<float, float> posizione; // corrisponderà a (x,y)
 
-const float incremento_mappa = 2;
+const float incremento_mappa = 2; //incremento in metri
+const float fattore_scala_celle_minimo = 2;
+const float metro = 1.0; //unità di riferimento
 
 //classe che identifica uan posizione
 /*class posizione {
@@ -30,8 +32,6 @@ const float incremento_mappa = 2;
     int x_;
     int y_;
 };*/
-
-
 
 void stampa_vettore_ostacoli(const set<posizione> &ostacoli);
 
@@ -51,7 +51,6 @@ public:
     //inoltre ai lati sono presenti delle cornici per identificare la posizione delle celle
     void stampa_mappa(string filename);
     bool ostacolo_in_posizione(const posizione &pos) const {return spazio_movimento_.at(pos);};
-    void crea_set_ostacoli(std::ifstream &file);
 
 private:
     set<posizione> ostacoli;
@@ -60,7 +59,10 @@ private:
     float dimensione_celle_metri_;
     map<posizione, bool> spazio_movimento_; //se booleano==false contiene robot o ostacolo
     void inserisci_celle(const posizione &minimo, const posizione &massimo);
-    void modifica_ostacolo (float &valore, bool minimo);
+    void modifica_ostacolo_multipli (float &valore, bool minimo);
+    void modifica_ostacolo_sottomultipli (float &valore, bool minimo);
+    void crea_set_ostacoli(std::ifstream &file);
+    void allinea_a_dim_celle(float &valore, bool minimo);
 };
 
 

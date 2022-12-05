@@ -16,32 +16,35 @@ void gnuplot::operator() (const std::string &command) {
     fflush(gnuplotpipe);
 }
 
-void stampa_grafico(int min_x, int min_y, int max_x, int max_y) {
+void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float dimensione_celle) {
     gnuplot p;
-    p("set palette defined (0 \"white\", 1 \"black\")");
+    p("set palette defined (0 \"black\", 1 \"white\")");
     p("set title \"Mappa degli ostacoli\"");
+    //unità misura in metri
     std::string comando{"set xrange["};
-    comando.append(std::to_string(min_x)).append(".5:").append(std::to_string(max_x)).append(".5] noreverse nowriteback");
+    comando.append(std::to_string(min_x)).append(":").append(std::to_string(max_x)).append("] noreverse nowriteback");
     p(comando);
     comando.clear();
     comando = "set yrange[";
-    comando.append(std::to_string(min_y)).append(".5:").append(std::to_string(max_y)).append(".5] noreverse nowriteback");
+    comando.append(std::to_string(min_y)).append(":").append(std::to_string(max_y)).append("] noreverse nowriteback");
     p(comando);
     p("unset colorbox");
-    p("set xtics 1 scale 0"); //imposta distanza di comparsa valori  etichette su asse x
-    p("set ytics 1 scale 0"); //imposta distanza di comparsa valori etichette su asse x
+    p("set xtics 1");
+    p("set ytics 1");
     comando.clear();
-    comando = "set x2range[";
-    comando.append(std::to_string(min_x)).append(":").append(std::to_string(max_x + 1)).append("] noreverse nowriteback");
+    //disegno celle
+    comando = "set x2tics ";
+    comando.append(std::to_string(min_x)).append(",").append(std::to_string(dimensione_celle)).append(",").append(std::to_string(max_x)).append("format \"\" scale 0 ");
     p(comando);
     comando.clear();
-    comando = "set y2range[";
-    comando.append(std::to_string(min_y)).append(":").append(std::to_string(max_y + 1)).append("] noreverse nowriteback");
+    comando = "set y2tics ";
+    comando.append(std::to_string(min_y)).append(",").append(std::to_string(dimensione_celle)).append(",").append(std::to_string(max_y)).append("format \"\" scale 0 ");
     p(comando);
-    p("set x2tics 1 format \"\" scale 0");
-    p("set y2tics 1 format \"\" scale 0");
-    p("set linetype 1 lc rgb \"dark-orange\"");
-    p("set grid x2tics y2tics front linetype 1");
+    p("set style line 12 lc rgb 'dark-orange' lt 1 lw 2");
+    p("set style line 13 lc rgb 'red' lt 1 lw 1");
+    p("set grid front x2tics y2tics ls 13");
+    p("set grid front  ");
+    //p("set terminal png size 1920,1080 enhanced font \"Helvetica,10\"");
     p("set out \"mappa.png\"");
     p("plot \"gnuplot_raw.dat\" with image notitle");
 }

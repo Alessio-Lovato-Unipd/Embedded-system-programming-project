@@ -15,6 +15,6 @@ protected:
 };
 
 //stampo grafico predefinito della mappa
-void stampa_grafico(int min_x, int min_y, int max_x, int max_y);
+void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float dimensione_celle);
 
 #endif

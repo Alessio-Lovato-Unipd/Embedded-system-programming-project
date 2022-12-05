@@ -40,12 +40,32 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
+  //controllo se
+  string dimensione{argv[3]};
+  bool primo_punto{true};
+ for (auto elemento : dimensione) {
+    if ((isdigit(elemento) == 0)){ // il carattere non è un digit
+      if (elemento == '.' or elemento == ',') {
+        if (!primo_punto) {
+          cerr << "Inserito un valore dimensionale con più punti" << endl;
+          exit(EXIT_FAILURE);
+        } else {
+          primo_punto = false;
+        }
+      } else if (elemento == '-') {
+          cerr << "Inserito un valore dimensionale negativo" << endl;
+          exit(EXIT_FAILURE);
+      } else {
+        cerr << "Inserito un valore dimensionale non numerico" << endl;
+        exit(EXIT_FAILURE);
+      }
+    }
+ }
+
+
     //mappa
     mappa griglia{argv[1], std::stof(argv[3])};
     griglia.stampa_ostacoli();
-
-    //stampo il vettore di ostacoli
-    //stampa_vettore_ostacoli(ostacoli);
 
     //stampa dimensioni griglia
     cout << "Minimo griglia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl

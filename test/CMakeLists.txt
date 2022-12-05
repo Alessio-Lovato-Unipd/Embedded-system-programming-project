@@ -12,7 +12,6 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 #Aggiunta sottocartelle dei test
 
 add_subdirectory(generazione_mappa)
-add_subdirectory(generazione_ostacolo)
 
 
 

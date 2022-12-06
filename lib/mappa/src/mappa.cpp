@@ -163,9 +163,9 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
             while (casella_corrente.second < massimo.second)
             {
                 if (ostacoli.contains(casella_corrente) == true)
-                    spazio_movimento_[casella_corrente] = false;
+                    spazio_movimento_.insert({casella_corrente, false});
                 else 
-                    spazio_movimento_[casella_corrente] = true;
+                    spazio_movimento_.insert({casella_corrente, true});
                 casella_corrente.second += dimensione_celle_metri_;
             }
         casella_corrente.first += dimensione_celle_metri_;
@@ -194,4 +194,10 @@ void mappa::stampa_mappa(std::string filename) {
         stampa.first = minimo_mappa_.first + dimensione_celle_metri_/2;
     }
     file.close();        
+}
+
+void mappa::aggiorna_mappa(const mappa &riferimento) {
+    std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_[elemento.first] = elemento.second;});
+    minimo_mappa_ = riferimento.posizione_minima();
+    massimo_mappa_ = riferimento.posizione_massima();
 }

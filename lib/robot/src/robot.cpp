@@ -1,34 +1,14 @@
 #include "robot.h"
 
 Robot::Robot(const posizione &robot, const posizione &obbiettivo, mappa &mappa_riferimento, const float raggio_robot)
-        : robot_{robot}, obbiettivo_{obbiettivo}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
+        : robot_celle_{robot}, robot_reale_{robot}, obbiettivo_celle_{obbiettivo}, obbiettivo_reale_{obbiettivo}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
 {
-        //centro il robot in una cella
-        centra_posizione(robot_.first);
-        centra_posizione(robot_.second);
-
-        if (!mappa_.contiene_cella(robot_))
-                incrementa_mappa(robot_);
-
-        //incremento in modo che la posizione del robot sia al centro di una cella
-        robot_.first += (((robot_.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
-        robot_.second += (((robot_.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));       
+        inserisci_dati_robot_su_mappa(robot_celle_, "Il robot");
+        inserisci_dati_robot_su_mappa(obbiettivo_celle_, "L'obbiettivo");      
         
-        //centro l'obbiettivo in una cella
-        centra_posizione(obbiettivo_.first);
-        centra_posizione(obbiettivo_.second);
-
-        if (!mappa_.contiene_cella(obbiettivo_))
-                incrementa_mappa(obbiettivo_);
-
-        //incremento in modo che la posizione del robot sia al centro di una cella
-        obbiettivo_.first += (((obbiettivo_.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
-        obbiettivo_.second += (((obbiettivo_.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
-        //controllo che l'obbiettivo o il robot non siano in un ostacolo
-
-        mappa_.rendi_cella_ostacolo(obbiettivo_);
+        mappa_.rendi_cella_ostacolo(robot_celle_);
+        mappa_.rendi_cella_ostacolo(obbiettivo_celle_);
         mappa_riferimento.aggiorna_mappa(mappa_);
-
 
 }
 
@@ -57,4 +37,22 @@ void Robot::centra_posizione(float &pos) {
         pos /= mappa_.dimensione_celle_metri();
         pos = arrotonda_valore(pos, (pos <= 0.0) ? true : false);
         pos *= mappa_.dimensione_celle_metri();
+}
+
+void Robot::inserisci_dati_robot_su_mappa(posizione &pos, string oggetto) {
+        //localizzo robot nelle celle
+        centra_posizione(pos.first);
+        centra_posizione(pos.second);
+
+        if (!mappa_.contiene_cella(pos))
+                incrementa_mappa(pos);
+        else if (mappa_.ostacolo_in_posizione(pos)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
+                std::cerr << oggetto << " è stato inserito in una posizione occupata da un ostacolo" << std::endl;
+                exit(EXIT_FAILURE);
+        }
+
+        //incremento in modo che la posizione del robot sia al centro di una cella
+        pos.first += (((pos.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
+        pos.second += (((pos.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));       
+
 }

@@ -28,7 +28,8 @@ public:
     mappa(string percorso_file_ostacoli, float dimensione_celle_in_metri = 1.0);
     const posizione posizione_minima() const {return minimo_mappa_;};
     const posizione posizione_massima() const {return massimo_mappa_;};
-    float dimensione_celle_metri() const {return dimensione_celle_metri_;} ;
+    float dimensione_celle_metri() const {return dimensione_celle_metri_;};
+    float dimensione_mezza_cella() const {return dimensione_mezza_cella_;};
     void rendi_cella_ostacolo(posizione pos) {spazio_movimento_[pos] = false;};
     void rendi_cella_libera(posizione pos) {spazio_movimento_[pos] = true;};
     void stampa_ostacoli() const {stampa_vettore_ostacoli(ostacoli);};
@@ -55,7 +56,7 @@ private:
     const float incremento_mappa = 2; //incremento in metri
     const float fattore_scala_celle_minimo = 2;
     const float metro = 1.0; //unità di riferimento
-
+    const float dimensione_mezza_cella_{dimensione_celle_metri_/2.0f};
     void modifica_ostacolo_multipli (float &valore, bool minimo);
     void modifica_ostacolo_sottomultipli (float &valore, bool minimo);
     void crea_set_ostacoli(std::ifstream &file);

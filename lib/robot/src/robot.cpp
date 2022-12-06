@@ -11,14 +11,22 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, mappa &mappa_r
                 incrementa_mappa(robot_);
 
         //incremento in modo che la posizione del robot sia al centro di una cella
-        robot_.first += (((robot_.first <= 0.0) ? (mappa_.dimensione_celle_metri()/2) : (-mappa_.dimensione_celle_metri()/2)));
-        robot_.second += (((robot_.second <= 0.0) ? (mappa_.dimensione_celle_metri()/2) : (-mappa_.dimensione_celle_metri()/2)));       
+        robot_.first += (((robot_.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
+        robot_.second += (((robot_.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));       
         
         //centro l'obbiettivo in una cella
-        //.......
+        centra_posizione(obbiettivo_.first);
+        centra_posizione(obbiettivo_.second);
+
+        if (!mappa_.contiene_cella(obbiettivo_))
+                incrementa_mappa(obbiettivo_);
+
+        //incremento in modo che la posizione del robot sia al centro di una cella
+        obbiettivo_.first += (((obbiettivo_.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
+        obbiettivo_.second += (((obbiettivo_.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
         //controllo che l'obbiettivo o il robot non siano in un ostacolo
 
-        mappa_.rendi_cella_ostacolo(robot_);
+        mappa_.rendi_cella_ostacolo(obbiettivo_);
         mappa_riferimento.aggiorna_mappa(mappa_);
 
 

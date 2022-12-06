@@ -94,7 +94,7 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         }
         //inserisco ostacoli mettendo un incremento della cella di dimensione/2 in modo da ottenere
         // il riferimento della posizione coincidente con la posizione in metri della cella
-        min = {min.first + (dimensione_celle_metri_/2), min.second + (dimensione_celle_metri_/2)};
+        min = {min.first + (dimensione_mezza_cella()), min.second + (dimensione_mezza_cella())};
         for (posizione pos{min}; pos.first < max.first; pos.first += dimensione_celle_metri_) {
             while (pos.second < max.second) {
                 ostacoli.insert(pos);
@@ -157,8 +157,8 @@ void  mappa::modifica_ostacolo_multipli (float &valore, bool minimo) {
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
         posizione casella_corrente{minimo};
         //mi posiziono con i valori al centro della prima cella, che corrisponde alla sua posizione
-        casella_corrente.first += dimensione_celle_metri_/2;
-        casella_corrente.second += dimensione_celle_metri_/2;
+        casella_corrente.first += dimensione_mezza_cella();
+        casella_corrente.second += dimensione_mezza_cella();
         while (casella_corrente.first < massimo.first) {
             while (casella_corrente.second < massimo.second)
             {
@@ -169,7 +169,7 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
                 casella_corrente.second += dimensione_celle_metri_;
             }
         casella_corrente.first += dimensione_celle_metri_;
-        casella_corrente.second = minimo.second + dimensione_celle_metri_/2;
+        casella_corrente.second = minimo.second + dimensione_mezza_cella();
     }
 }
 
@@ -183,7 +183,7 @@ void mappa::stampa_mappa(std::string filename) {
     //ciclo stampa valori
     // 0 -> no ostacoli
     // 1 -> ostacoli
-    posizione stampa{minimo_mappa_.first + dimensione_celle_metri_/2, massimo_mappa_.second - dimensione_celle_metri_/2};
+    posizione stampa{minimo_mappa_.first + dimensione_mezza_cella(), massimo_mappa_.second - dimensione_mezza_cella()};
     while (stampa.second > minimo_mappa_.second) {
         while(stampa.first < massimo_mappa_.first) {
             file << !spazio_movimento_.at(stampa);
@@ -191,7 +191,7 @@ void mappa::stampa_mappa(std::string filename) {
         }
         file << endl;
         stampa.second -= dimensione_celle_metri_;
-        stampa.first = minimo_mappa_.first + dimensione_celle_metri_/2;
+        stampa.first = minimo_mappa_.first + dimensione_mezza_cella();
     }
     file.close();        
 }

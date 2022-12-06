@@ -13,7 +13,7 @@ add_library(robot STATIC src/robot.cpp)
 
 target_include_directories(robot PUBLIC include)
 
-target_link_libraries(robot PUBLIC mappa gnuplot)
+target_link_libraries(robot PUBLIC mappa)
 
 add_library(lib::robot ALIAS robot)
 

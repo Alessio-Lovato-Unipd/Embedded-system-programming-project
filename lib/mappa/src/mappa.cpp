@@ -186,7 +186,10 @@ void mappa::stampa_mappa(std::string filename) {
     posizione stampa{minimo_mappa_.first + dimensione_mezza_cella(), massimo_mappa_.second - dimensione_mezza_cella()};
     while (stampa.second > minimo_mappa_.second) {
         while(stampa.first < massimo_mappa_.first) {
-            file << !spazio_movimento_.at(stampa);
+            if (contains_robot(stampa))
+                file << "2";
+            else
+                file << !spazio_movimento_.at(stampa);
             stampa.first += dimensione_celle_metri_;
         }
         file << endl;
@@ -200,4 +203,6 @@ void mappa::aggiorna_mappa(const mappa &riferimento) {
     std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_[elemento.first] = elemento.second;});
     minimo_mappa_ = riferimento.posizione_minima();
     massimo_mappa_ = riferimento.posizione_massima();
+    cancella_robot();
+    std::for_each(riferimento.robot_cbegin(), riferimento.robot_cend(), [this](auto &el) {posiziona_robot_cella(el);});
 }

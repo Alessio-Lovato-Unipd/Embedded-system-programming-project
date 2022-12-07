@@ -1,7 +1,9 @@
 #include "gnuplot.h"
+#include <unistd.h>
 
 gnuplot::gnuplot()
-        : gnuplotpipe {popen ("gnuplot -persit", "w")} {
+    //    : gnuplotpipe {popen ("gnuplot -persist", "w")} {
+            : gnuplotpipe {popen ("gnuplot", "w")} {
     if (!gnuplotpipe)
         std::cerr << ("Gnuplot non trovato!");
 }
@@ -18,7 +20,7 @@ void gnuplot::operator() (const std::string &command) {
 
 void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float dimensione_celle) {
     gnuplot p;
-    p("set palette defined (0 \"black\", 1 \"white\")");
+    p("set palette defined (0 \"black\", 1 \"white\", 2 \"dark-green\")");
     p("set title \"Mappa degli ostacoli\"");
     //unità misura in metri
     std::string comando{"set xrange["};
@@ -45,6 +47,7 @@ void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float di
     p("set grid front x2tics y2tics ls 13");
     p("set grid front  ");
     //p("set terminal png size 1920,1080 enhanced font \"Helvetica,10\"");
-    p("set out \"mappa.png\"");
+    //p("set out \"mappa.png\"");
     p("plot \"gnuplot_raw.dat\" with image notitle");
+    sleep(1);
 }

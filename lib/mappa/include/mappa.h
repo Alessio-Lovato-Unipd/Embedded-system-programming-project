@@ -34,7 +34,7 @@ public:
     //stampo una matrice contenete 0 se non ho ostacoli e 1 se li ha,
     //inoltre ai lati sono presenti delle cornici per identificare la posizione delle celle
     void stampa_mappa(string filename);
-    bool ostacolo_in_posizione(const posizione &pos) const {return spazio_movimento_.at(pos);};
+    bool cella_libera(const posizione &pos) const {return spazio_movimento_.at(pos);};
     void imposta_fattore_scala_repulsivo(float valore) {fattore_scala_campo_repulsivo_ = valore;};
     void imposta_fattore_scala_attrattivo(float valore) {fattore_scala_campo_attrattivo_ = valore;};
     void imposta_distanza_minima_ostacolo_percepito_(float valore) {distanza_minima_ostacolo_percepito_ = valore;};

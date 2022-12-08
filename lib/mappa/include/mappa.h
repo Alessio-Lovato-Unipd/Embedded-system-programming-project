@@ -68,10 +68,11 @@ private:
     const float incremento_mappa = 2; //incremento in metri
     const float fattore_scala_celle_minimo = 2;
     const float metro = 1.0; //unità di riferimento
+
     const float dimensione_mezza_cella_{dimensione_celle_metri_/2.0f};
-    float fattore_scala_campo_attrattivo_{0.8};
-    float fattore_scala_campo_repulsivo_{50.0};
-    float distanza_minima_ostacolo_percepito_{8.0};
+    float fattore_scala_campo_attrattivo_{1.5};
+    float fattore_scala_campo_repulsivo_{100.0};
+    float distanza_minima_ostacolo_percepito_{5.0};
     void modifica_ostacolo_multipli (float &valore, bool minimo);
     void modifica_ostacolo_sottomultipli (float &valore, bool minimo);
     void crea_set_ostacoli(std::ifstream &file);

@@ -28,7 +28,7 @@ private:
     posizione obbiettivo_reale_;
     mappa mappa_;
     float raggio_;
-    queue<posizione> posizioni_precedenti;
+    set<posizione> posizioni_precedenti;
 
     void incrementa_mappa(const posizione &posizione_necessaria);
     void centra_posizione(distanza &pos);

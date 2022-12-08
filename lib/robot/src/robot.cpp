@@ -47,7 +47,7 @@ void Robot::inserisci_dati_robot_su_mappa(posizione &pos, string oggetto) {
 
         if (!mappa_.contiene_cella(pos))
                 incrementa_mappa(pos);
-        else if (mappa_.ostacolo_in_posizione(pos)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
+        else if (!mappa_.cella_libera(pos)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
                 std::cerr << oggetto << " è stato inserito in una posizione occupata da un ostacolo" << std::endl;
                 exit(EXIT_FAILURE);
         }
@@ -89,35 +89,35 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
         pair<posizione, distanza> ostacolo{oggetto_piu_vicino(attuale, mappa_.ostacoli_cbegin(), mappa_.ostacoli_cend())};
         //cella +/
         attuale.first += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella ++
         attuale.second += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /+
         attuale.first -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella -+
         attuale.first -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.second -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella --
         attuale.second -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.first += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella +-
         attuale.first += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
 
         return potenziali;
@@ -145,13 +145,24 @@ void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
         
         //attendo mutex per leggere posizioni robot aggiornate
         mappa_.aggiorna_mappa(mappa_condivisa);
-        //aggiorna_campi_potenziale(potenziali_celle);
+        aggiorna_campi_potenziale(potenziali_celle);
+        //evito minimi locali
         posizione prossima_cella{std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
                                                         [](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first};
+        while (posizioni_precedenti.contains(prossima_cella)) {
+                potenziali_celle.erase(prossima_cella);
+                if (potenziali_celle.empty()) {
+                        std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
+                        exit(EXIT_FAILURE);
+                }
+                prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
+                                                        [](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
+        }
         mappa_.libera_cella_robot(robot_celle_);
         robot_celle_ = std::make_pair(prossima_cella.first, prossima_cella.second);
         mappa_.posiziona_robot_cella(prossima_cella);
         mappa_condivisa.aggiorna_mappa(mappa_);
         //rilascio chiave mutex
+        posizioni_precedenti.insert(prossima_cella);
 
 }

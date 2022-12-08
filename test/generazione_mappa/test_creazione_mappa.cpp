@@ -20,7 +20,7 @@ void stampa_gnuplot(mappa &map) {
     for (float x{map.posizione_minima().first + (map.dimensione_celle_metri()/2)}; x < map.posizione_massima().first; x += map.dimensione_celle_metri()) {
         for(float y = map.posizione_minima().second + (map.dimensione_celle_metri()/2); y < map.posizione_massima().second; y += map.dimensione_celle_metri()) {
           file << x << " " << y << " ";
-          file << map.ostacolo_in_posizione(posizione{x,y});
+          file << map.cella_libera(posizione{x,y});
           file << endl;
         }
         file << endl;

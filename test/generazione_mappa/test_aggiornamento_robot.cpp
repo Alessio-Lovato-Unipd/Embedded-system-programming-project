@@ -25,7 +25,7 @@ void stampa_gnuplot(mappa &map) {
           if (map.contains_robot(posizione{x,y}))
             file << "2";
           else
-            file << map.ostacolo_in_posizione(posizione{x,y});
+            file << map.cella_libera(posizione{x,y});
           file << endl;
         }
         file << endl;

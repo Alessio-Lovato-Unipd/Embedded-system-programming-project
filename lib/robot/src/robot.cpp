@@ -3,9 +3,18 @@
 Robot::Robot(const posizione &robot, const posizione &obbiettivo, mappa &mappa_riferimento, const float raggio_robot)
         : robot_celle_{robot}, robot_reale_{robot}, obbiettivo_celle_{obbiettivo}, obbiettivo_reale_{obbiettivo}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
 {
+
         inserisci_dati_robot_su_mappa(robot_celle_, "Il robot");
-        inserisci_dati_robot_su_mappa(obbiettivo_celle_, "L'obbiettivo");      
-        
+        inserisci_dati_robot_su_mappa(obbiettivo_celle_, "L'obbiettivo"); 
+
+        if (!mappa_.cella_libera(obbiettivo_celle_)) {
+                std::cerr << "L'obiettivo impostato si trova sopra un ostacolo" << endl;
+                exit(EXIT_FAILURE);
+        }   
+        if (!mappa_.cella_libera(robot_celle_)) {
+                std::cerr << "Il punto di partenza impostato si trova sopra un ostacolo" << endl;
+                exit(EXIT_FAILURE);
+        }
         mappa_.posiziona_robot_cella(robot_celle_);
 
         //attendo mutex per aggiornare mappa

@@ -93,7 +93,9 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella ++
         attuale.second += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
+        posizione limite1{std::make_pair(attuale.first, attuale.second - mappa_.dimensione_celle_metri())};
+        posizione limite2{std::make_pair(attuale.first - mappa_.dimensione_celle_metri(), attuale.second)};
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /+
         attuale.first -= mappa_.dimensione_celle_metri();
@@ -101,7 +103,9 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella -+
         attuale.first -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
+        limite1 = std::make_pair(attuale.first, attuale.second - mappa_.dimensione_celle_metri());
+        limite2 = std::make_pair(attuale.first + mappa_.dimensione_celle_metri(), attuale.second);
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.second -= mappa_.dimensione_celle_metri();
@@ -109,7 +113,9 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella --
         attuale.second -= mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
+        limite1 = std::make_pair(attuale.first, attuale.second + mappa_.dimensione_celle_metri());
+        limite2 = std::make_pair(attuale.first + mappa_.dimensione_celle_metri(), attuale.second);
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.first += mappa_.dimensione_celle_metri();
@@ -117,7 +123,9 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella +-
         attuale.first += mappa_.dimensione_celle_metri();
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
+        limite1 = std::make_pair(attuale.first, attuale.second + mappa_.dimensione_celle_metri());
+        limite2 = std::make_pair(attuale.first - mappa_.dimensione_celle_metri(), attuale.second);
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
 
         return potenziali;

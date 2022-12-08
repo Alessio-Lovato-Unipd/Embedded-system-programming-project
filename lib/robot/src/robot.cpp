@@ -102,9 +102,7 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella ++
         attuale.second += mappa_.dimensione_celle_metri();
-        posizione limite1{std::make_pair(attuale.first, attuale.second - mappa_.dimensione_celle_metri())};
-        posizione limite2{std::make_pair(attuale.first - mappa_.dimensione_celle_metri(), attuale.second)};
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /+
         attuale.first -= mappa_.dimensione_celle_metri();
@@ -112,9 +110,7 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella -+
         attuale.first -= mappa_.dimensione_celle_metri();
-        limite1 = std::make_pair(attuale.first, attuale.second - mappa_.dimensione_celle_metri());
-        limite2 = std::make_pair(attuale.first + mappa_.dimensione_celle_metri(), attuale.second);
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.second -= mappa_.dimensione_celle_metri();
@@ -122,9 +118,7 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella --
         attuale.second -= mappa_.dimensione_celle_metri();
-        limite1 = std::make_pair(attuale.first, attuale.second + mappa_.dimensione_celle_metri());
-        limite2 = std::make_pair(attuale.first + mappa_.dimensione_celle_metri(), attuale.second);
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella /-
         attuale.first += mappa_.dimensione_celle_metri();
@@ -132,9 +126,7 @@ map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
         //cella +-
         attuale.first += mappa_.dimensione_celle_metri();
-        limite1 = std::make_pair(attuale.first, attuale.second + mappa_.dimensione_celle_metri());
-        limite2 = std::make_pair(attuale.first - mappa_.dimensione_celle_metri(), attuale.second);
-        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale) && mappa_.cella_libera(limite1) && mappa_.cella_libera(limite2))
+        if (mappa_.contiene_cella(attuale) && mappa_.cella_libera(attuale))
                 potenziali.insert({attuale, {ostacolo.second, campo_attrattivo(attuale,obbiettivo_celle_) + campo_repulsivo(attuale, ostacolo.first)}});
 
         return potenziali;
@@ -147,7 +139,7 @@ float Robot::ricalcolo_potenziale_cella (const posizione &cella_da_ricalcolare, 
 void Robot::aggiorna_campi_potenziale (map<posizione, dati_cella> &celle_con_potenziali) {
         for (auto elemento : celle_con_potenziali) {
                 pair<posizione, distanza> ostacolo{oggetto_piu_vicino(elemento.first, mappa_.robot_cbegin(), mappa_.robot_cend())};
-                if (elemento.first.second > ostacolo.second) {
+                if (elemento.second.first > ostacolo.second) {
                         //associo la nuova distanza alla cella
                         elemento.second.first = ostacolo.second;
                         elemento.second.second = ricalcolo_potenziale_cella(elemento.first, ostacolo.first);
@@ -155,18 +147,26 @@ void Robot::aggiorna_campi_potenziale (map<posizione, dati_cella> &celle_con_pot
         }
 }
 
-
+//prima faccio i calcoli sulla mappa che conosco, poi aggiorno le posizioni dei robot
 void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
-        //prima faccio i calcoli sulla mappa che conosco, poi aggiorno le posizioni dei robot
+
+        //se il robot è abbastanza vicino all'ostacolo elimino la componente repulsia del campo di forza
+        if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
+                mappa_.imposta_fattore_scala_repulsivo(0);
         map<posizione, dati_cella> potenziali_celle{calcola_potenziali_celle_adiacenti()};
         
         //attendo mutex per leggere posizioni robot aggiornate
         mappa_.aggiorna_mappa(mappa_condivisa);
         aggiorna_campi_potenziale(potenziali_celle);
+        limita_spostamenti(potenziali_celle);
         //evito minimi locali
-        posizione prossima_cella{std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
-                                                        [](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first};
-        while (posizioni_precedenti.contains(prossima_cella)) {
+        posizione prossima_cella;
+        if (potenziali_celle.contains(obbiettivo_celle_))
+                prossima_cella = {obbiettivo_celle_.first, obbiettivo_celle_.second};
+        else
+                prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
+                                                        [](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
+        while (posizioni_precedenti.contains(prossima_cella) || mappa_.contains_robot(prossima_cella)) {
                 potenziali_celle.erase(prossima_cella);
                 if (potenziali_celle.empty()) {
                         std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
@@ -176,10 +176,40 @@ void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
                                                         [](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
         }
         mappa_.libera_cella_robot(robot_celle_);
-        robot_celle_ = std::make_pair(prossima_cella.first, prossima_cella.second);
+        robot_celle_ = {prossima_cella.first, prossima_cella.second};
         mappa_.posiziona_robot_cella(prossima_cella);
         mappa_condivisa.aggiorna_mappa(mappa_);
         //rilascio chiave mutex
         posizioni_precedenti.insert(prossima_cella);
 
+}
+
+void Robot::limita_spostamenti(map<posizione, dati_cella> &potenziali_celle) {
+        //cella ++
+        posizione da_verificare{robot_celle_.first + mappa_.dimensione_celle_metri(), robot_celle_.second + mappa_.dimensione_celle_metri()};
+        posizione limite1{da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
+        posizione limite2{da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
+        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                potenziali_celle.erase(da_verificare);
+
+        //cella -+
+        da_verificare = {robot_celle_.first - mappa_.dimensione_celle_metri(), robot_celle_.second + mappa_.dimensione_celle_metri()};
+        limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
+        limite2 = {da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
+        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                potenziali_celle.erase(da_verificare);
+
+        //cella --
+        da_verificare = {robot_celle_.first - mappa_.dimensione_celle_metri(), robot_celle_.second - mappa_.dimensione_celle_metri()};
+        limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
+        limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
+        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                potenziali_celle.erase(da_verificare);
+        
+        //cella +-
+        da_verificare = {robot_celle_.first + mappa_.dimensione_celle_metri(), robot_celle_.second - mappa_.dimensione_celle_metri()};
+        limite1 = {da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
+        limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
+        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                potenziali_celle.erase(da_verificare);
 }

@@ -41,5 +41,12 @@ private:
     map<posizione, dati_cella> calcola_potenziali_celle_adiacenti();
     float ricalcolo_potenziale_cella (const posizione &cella_da_ricalcolare, const posizione &robot_ostacolo) const;
     void aggiorna_campi_potenziale(map<posizione, dati_cella> &celle_con_potenziali);
+
+    /*Funzione per verificare che il robot non faccia uno spostamento diagonale se adiacente ad
+    un altro robot o ad un ostacolo.
+    Parametri:
+    - mappa che rappresenta i possibili spostamenti futuri
+    */
+    void limita_spostamenti(map<posizione, dati_cella> &potenziali_celle);
 };
 #endif

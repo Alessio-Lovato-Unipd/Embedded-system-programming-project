@@ -5,7 +5,7 @@ mappa::mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri)
 
     //verifico che la dimensione sia multiplo o sottomultiplo del metro
     if (dimensione_celle_metri_ == 0.0) {
-        std::cerr << "Non è stato inserito un valore multiplo o sottomultiplo del metro" << std::endl;
+        std::cerr << "E' stata inserito un valore nullo per la dimensione della cella" << std::endl;
         exit(EXIT_FAILURE);
     }
     

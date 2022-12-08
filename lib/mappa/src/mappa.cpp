@@ -1,10 +1,10 @@
 #include "mappa.h"
 
-mappa::mappa(string percorso_file_ostacoli, float dimensione_celle_in_metri)
+mappa::mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri)
         : dimensione_celle_metri_{dimensione_celle_in_metri} {
 
     //verifico che la dimensione sia multiplo o sottomultiplo del metro
-    if (dimensione_celle_metri_ == 0.0 || ((std::fmod(metro, dimensione_celle_metri_) != 0.0) && (std::fmod(dimensione_celle_metri_, metro)!= 0.0))) {
+    if (dimensione_celle_metri_ == 0.0) {
         std::cerr << "Non è stato inserito un valore multiplo o sottomultiplo del metro" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -27,23 +27,16 @@ mappa::mappa(string percorso_file_ostacoli, float dimensione_celle_in_metri)
 
     //incremento i valori per avere dimensioni maggiori nel caso avessi ostacoli alle estremità
     // e rendo i numeri interi così da non aver problemi di mcm nel caso la dimensione degli ostacoli non combaciasse con le celle
-    minimo_mappa_ = {arrotonda_valore(((min_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; }))->first - incremento_mappa), true),
-                    arrotonda_valore(((min_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; }))->second - incremento_mappa), true)};
+    minimo_mappa_ = {min_element(ostacoli.begin(), ostacoli.end(), 
+                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first - (incremento_mappa * dimensione_celle_metri_),
+                    min_element(ostacoli.begin(), ostacoli.end(), 
+                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second - (incremento_mappa * dimensione_celle_metri_)};
        
-    massimo_mappa_ = {arrotonda_valore(((max_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; }))->first + incremento_mappa), false),
-                    arrotonda_valore(((max_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; }))->second + incremento_mappa), false)};
+    massimo_mappa_ = {max_element(ostacoli.begin(), ostacoli.end(), 
+                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first + (incremento_mappa * dimensione_celle_metri_),
+                    max_element(ostacoli.begin(), ostacoli.end(), 
+                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second + (incremento_mappa * dimensione_celle_metri_)};
 
-    //nel caso in cui la dimensione delle celle sia un multiplo del metro, porto la dimensione a un multiplo della dimensione cella
-    if(dimensione_celle_metri_ > metro) {
-        allinea_a_dim_celle(minimo_mappa_.first, true);
-        allinea_a_dim_celle(minimo_mappa_.second, true);
-        allinea_a_dim_celle(massimo_mappa_.first, false);
-        allinea_a_dim_celle(massimo_mappa_.second, false);
-    }
 
     //creo la mappa 
     if (dimensione_celle_metri_ > ((massimo_mappa_.first - minimo_mappa_.first)/fattore_scala_celle_minimo) ||
@@ -61,16 +54,16 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
    
     while (getline(file, line)) {
         auto virgola{line.find(',')};
-        float x1{stof(line.substr(0, virgola))};
+        double x1{stof(line.substr(0, virgola))};
 
         auto virgola_successiva{line.find(',', virgola + 1)};
-		    float y1{stof(line.substr(virgola + 1, virgola_successiva))};
+		    double y1{stof(line.substr(virgola + 1, virgola_successiva))};
 
         virgola = line.find(',', virgola_successiva + 1);
-		    float x2{stof(line.substr(virgola_successiva + 1, virgola))};
+		    double x2{stof(line.substr(virgola_successiva + 1, virgola))};
 
         virgola_successiva = line.find(',', virgola + 1);
-		    float y2{stof(line.substr(virgola + 1, virgola_successiva))};
+		    double y2{stof(line.substr(virgola + 1, virgola_successiva))};
 
         //calcolo celle da inserire
         posizione x{std::minmax(x1,x2)};
@@ -80,21 +73,13 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         posizione max{x.second, y.second};
         posizione min{x.first, y.first};
 
-        //divido caso multipli o sottomultipli
-        if (dimensione_celle_metri_ <= metro) {
-            modifica_ostacolo_sottomultipli(max.first, false);
-            modifica_ostacolo_sottomultipli(max.second, false);
-            modifica_ostacolo_sottomultipli(min.first, true);
-            modifica_ostacolo_sottomultipli(min.second, true);
-        } else {
-            modifica_ostacolo_multipli(max.first, false);
-            modifica_ostacolo_multipli(max.second, false);
-            modifica_ostacolo_multipli(min.first, true);
-            modifica_ostacolo_multipli(min.second, true);
-        }
+        centra_posizione(max.first);
+        centra_posizione(max.second);
+        centra_posizione(min.first);
+        centra_posizione(min.second);
+
         //inserisco ostacoli mettendo un incremento della cella di dimensione/2 in modo da ottenere
         // il riferimento della posizione coincidente con la posizione in metri della cella
-        min = {min.first + (dimensione_mezza_cella()), min.second + (dimensione_mezza_cella())};
         for (posizione pos{min}; pos.first < max.first; pos.first += dimensione_celle_metri_) {
             while (pos.second < max.second) {
                 ostacoli.insert(pos);
@@ -104,7 +89,6 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         }
     }
 
-    file.close();
 }
 
 void stampa_vettore_ostacoli(const set<posizione> &ostacoli) {
@@ -113,52 +97,28 @@ void stampa_vettore_ostacoli(const set<posizione> &ostacoli) {
     cout << endl;
 }
 
-float arrotonda_valore(float valore, bool minimo) {
-    if (minimo)
-        valore = floor(valore);
+void mappa::centra_posizione (double &valore) {
+    double limite{valore};
+    limite /= dimensione_celle_metri_;
+    if (valore < 0.0)
+        limite = floor(limite);
     else
-        valore = ceil(valore);
-    return valore;
-}
+        limite = ceil(limite);
 
-void mappa::allinea_a_dim_celle(float &valore, bool minimo) {
-    if (minimo) {
-        while (fmod(valore, dimensione_celle_metri_) != 0.0)
-            valore--;
-    } else {
-        while (fmod(valore, dimensione_celle_metri_) != 0.0)
-            valore++;
-    }
-}
+    limite *= dimensione_celle_metri_;
+    if (valore < 0.0)
+        limite -= dimensione_mezza_cella_;
+    else
+        limite += dimensione_mezza_cella_;
 
-void mappa::modifica_ostacolo_sottomultipli (float &valore, bool minimo) {
-    if (fmod(valore, dimensione_celle_metri_) == 0.0 )
-        return;
-    float limite{arrotonda_valore(valore, minimo)};
-    if (minimo) {
-        while(limite < valore)
-            limite += dimensione_celle_metri_;
-        limite -= dimensione_celle_metri_;
-    } else {
-        while(limite > valore)
-            limite -= dimensione_celle_metri_;
-        limite += dimensione_celle_metri_;
-    }
     valore = limite;
-}
-
-void  mappa::modifica_ostacolo_multipli (float &valore, bool minimo) {
-    if (fmod(valore, dimensione_celle_metri_) == 0.0 )
-        return;
-    valore = arrotonda_valore(valore, minimo);
-    allinea_a_dim_celle(valore, minimo);
 }
 
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
         posizione casella_corrente{minimo};
         //mi posiziono con i valori al centro della prima cella, che corrisponde alla sua posizione
-        casella_corrente.first += dimensione_mezza_cella();
-        casella_corrente.second += dimensione_mezza_cella();
+        casella_corrente.first += dimensione_mezza_cella_;
+        casella_corrente.second += dimensione_mezza_cella_;
         while (casella_corrente.first < massimo.first) {
             while (casella_corrente.second < massimo.second)
             {
@@ -169,7 +129,7 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
                 casella_corrente.second += dimensione_celle_metri_;
             }
         casella_corrente.first += dimensione_celle_metri_;
-        casella_corrente.second = minimo.second + dimensione_mezza_cella();
+        casella_corrente.second = minimo.second + dimensione_mezza_cella_;
     }
 }
 
@@ -183,7 +143,7 @@ void mappa::stampa_mappa(std::string filename) {
     //ciclo stampa valori
     // 0 -> no ostacoli
     // 1 -> ostacoli
-    posizione stampa{minimo_mappa_.first + dimensione_mezza_cella(), massimo_mappa_.second - dimensione_mezza_cella()};
+    posizione stampa{minimo_mappa_.first + dimensione_mezza_cella_, massimo_mappa_.second - dimensione_mezza_cella_};
     while (stampa.second > minimo_mappa_.second) {
         while(stampa.first < massimo_mappa_.first) {
             if (contains_robot(stampa))
@@ -194,7 +154,7 @@ void mappa::stampa_mappa(std::string filename) {
         }
         file << endl;
         stampa.second -= dimensione_celle_metri_;
-        stampa.first = minimo_mappa_.first + dimensione_mezza_cella();
+        stampa.first = minimo_mappa_.first + dimensione_mezza_cella_;
     }
     file.close();        
 }

@@ -76,23 +76,17 @@ int main(int argc, char *argv[]) {
     cout << "Minimo griglia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl
     << "Massimo griglia--> x: " << griglia.posizione_massima().first << "  y: " << griglia.posizione_massima().second << endl;
 
-    //stampa griglia
-    //griglia.stampa_mappa(argv[2]);
-
-    //inizio stampa gnuplot
-    //stampa_gnuplot(griglia);
-
-    Robot robot1{posizione{-5,-6}, posizione{15,15}, griglia};
-  
+    Robot robot1{posizione{20,20}, posizione{4,1}, griglia};
+    Robot robot2{posizione{-1.5,-2.5}, posizione{20,20}, griglia};
+    cout << "obbiettivo: " <<robot1.obbiettivo().first << " : " << robot1.obbiettivo().second << endl;
     griglia.stampa_mappa(argv[2]);
     stampa_gnuplot(griglia);
     while ((robot1.posizione_attuale().first != robot1.obbiettivo().first) || (robot1.posizione_attuale().second != robot1.obbiettivo().second)) {
       robot1.sposta_su_cella_successiva(griglia);
-      griglia.posiziona_robot_cella(posizione{15,15});
       cout << "posizione: " <<robot1.posizione_attuale().first << " : " << robot1.posizione_attuale().second << endl;
       stampa_gnuplot(griglia);
     }
-    cout << "obbietttivo: " <<robot1.obbiettivo().first << " : " << robot1.obbiettivo().second << endl;
+    cout << "obbiettivo: " <<robot1.obbiettivo().first << " : " << robot1.obbiettivo().second << endl;
 
 
     return 0;

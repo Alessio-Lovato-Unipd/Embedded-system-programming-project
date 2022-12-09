@@ -17,19 +17,25 @@ void stampa_gnuplot(mappa &map) {
     //ciclo stampa valori
     // 0 -> no ostacoli
     // 1 -> ostacoli
-    for (float x{map.posizione_minima().first + (map.dimensione_celle_metri()/2)}; x < map.posizione_massima().first; x += map.dimensione_celle_metri()) {
-        for(float y = map.posizione_minima().second + (map.dimensione_celle_metri()/2); y < map.posizione_massima().second; y += map.dimensione_celle_metri()) {
+    // 2 -> robot
+    for (double x{map.posizione_minima().first}; x <= map.posizione_massima().first; x += map.dimensione_celle_metri()) {
+        for(double y = map.posizione_minima().second; y <= map.posizione_massima().second; y += map.dimensione_celle_metri()) {
           file << x << " " << y << " ";
-          file << map.cella_libera(posizione{x,y});
+          if (map.contains_robot(posizione{x,y}))
+            file << "2";
+          else
+            file << map.cella_libera(posizione{x,y});
           file << endl;
         }
         file << endl;
     }
+
     file.close();
 
     //stampa grafico
-    stampa_grafico(map.posizione_minima().first,map.posizione_minima().second,
-                  map.posizione_massima().first, map.posizione_massima().second, map.dimensione_celle_metri());
+    stampa_grafico(map.posizione_minima().first - map.dimensione_mezza_cella(),map.posizione_minima().second - map.dimensione_mezza_cella(),
+                  map.posizione_massima().first + map.dimensione_mezza_cella(), map.posizione_massima().second + map.dimensione_mezza_cella(),
+                  map.dimensione_celle_metri());
   
 }
 
@@ -40,7 +46,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  //controllo se la dimensione inserita è un float
+  //controllo se la dimensione inserita è un numero
   string dimensione{argv[3]};
   bool primo_punto{true};
  for (auto elemento : dimensione) {

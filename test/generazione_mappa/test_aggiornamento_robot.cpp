@@ -19,8 +19,8 @@ void stampa_gnuplot(mappa &map) {
     // 0 -> no ostacoli
     // 1 -> ostacoli
     // 2 -> robot
-    for (float x{map.posizione_minima().first + (map.dimensione_celle_metri()/2)}; x < map.posizione_massima().first; x += map.dimensione_celle_metri()) {
-        for(float y = map.posizione_minima().second + (map.dimensione_celle_metri()/2); y < map.posizione_massima().second; y += map.dimensione_celle_metri()) {
+    for (double x{map.posizione_minima().first}; x <= map.posizione_massima().first; x += map.dimensione_celle_metri()) {
+        for(double y = map.posizione_minima().second; y <= map.posizione_massima().second; y += map.dimensione_celle_metri()) {
           file << x << " " << y << " ";
           if (map.contains_robot(posizione{x,y}))
             file << "2";
@@ -30,11 +30,13 @@ void stampa_gnuplot(mappa &map) {
         }
         file << endl;
     }
+
     file.close();
 
     //stampa grafico
-    stampa_grafico(map.posizione_minima().first,map.posizione_minima().second,
-                  map.posizione_massima().first, map.posizione_massima().second, map.dimensione_celle_metri());
+    stampa_grafico(map.posizione_minima().first - map.dimensione_mezza_cella(),map.posizione_minima().second - map.dimensione_mezza_cella(),
+                  map.posizione_massima().first + map.dimensione_mezza_cella(), map.posizione_massima().second + map.dimensione_mezza_cella(),
+                  map.dimensione_celle_metri());
   
 }
 
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  //controllo se la dimensione inserita è un float
+  //controllo se la dimensione inserita è un double
   string dimensione{argv[3]};
   bool primo_punto{true};
  for (auto elemento : dimensione) {
@@ -76,9 +78,10 @@ int main(int argc, char *argv[]) {
     cout << "Minimo griglia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl
     << "Massimo griglia--> x: " << griglia.posizione_massima().first << "  y: " << griglia.posizione_massima().second << endl;
 
-    Robot robot1{posizione{20,20}, posizione{4,1}, griglia};
-    Robot robot2{posizione{-1.5,-2.5}, posizione{20,20}, griglia};
+    Robot robot1{posizione{20, 20}, posizione{0.4, 0.5}, griglia};
+    Robot robot2{posizione{8.3, 6.7}, posizione{23,12.7}, griglia};
     cout << "obbiettivo: " <<robot1.obbiettivo().first << " : " << robot1.obbiettivo().second << endl;
+    cout << "robot2: " <<robot2.posizione_attuale().first << " : " << robot2.posizione_attuale().second << endl;
     griglia.stampa_mappa(argv[2]);
     stampa_gnuplot(griglia);
     while ((robot1.posizione_attuale().first != robot1.obbiettivo().first) || (robot1.posizione_attuale().second != robot1.obbiettivo().second)) {

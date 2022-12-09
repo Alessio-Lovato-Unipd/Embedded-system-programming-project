@@ -107,12 +107,12 @@ public:
     */
     void aggiorna_mappa (const Mappa &riferimento);
 
-    /*Funzione per inserire le celle e gli ostacoli in una mappa. Non sovrascrive i dati esistenti
-      Parametri:
-        - minimo: posizione della cella estrema inferiore della mappa dalla quale partire a inserire i dati
-        - massimmo: posizione della cella estrema superiore alla quale fermare l'inserimento dei dati
+    /*Funzione per inserire le celle e gli ostacoli in una mappa. Inserisce le celle dalla posizione
+      minima della mappa alla posizione massima senza sovrascrivere i dati.
+      N.B. Per aumentare le dimensioni della mappa, prima di usare la funzione, cambiare le dimensioni di
+      posizione minima e massima.
     */
-    void inserisci_celle(const posizione &minimo, const posizione &massimo);
+    void inserisci_celle();
 
     /*Funzione per aggiornare i valori di minimo e massimo della mappa
       Parametri:

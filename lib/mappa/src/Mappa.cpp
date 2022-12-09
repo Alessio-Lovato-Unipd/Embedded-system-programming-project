@@ -51,7 +51,7 @@ Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, in
             exit(EXIT_FAILURE);
     }
     //creo la mappa
-    inserisci_celle(minimo_mappa_, massimo_mappa_);       
+    inserisci_celle();       
 }
 
 void Mappa::crea_set_ostacoli(std::ifstream &file){
@@ -128,9 +128,9 @@ void Mappa::centra_posizione (double &valore, const tipo_posizione tipo) const {
     valore = limite;
 }
 
-void Mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
-    for (auto x{minimo.first}; x <= massimo.first; x += dimensione_celle_metri_) {
-        for(auto y{minimo.second}; y <= massimo.second; y += dimensione_celle_metri_) {
+void Mappa::inserisci_celle() {
+    for (auto x{minimo_mappa_.first}; x <= massimo_mappa_.first; x += dimensione_celle_metri_) {
+        for(auto y{minimo_mappa_.second}; y <= massimo_mappa_.second; y += dimensione_celle_metri_) {
             if (ostacoli.contains(posizione{x,y}) == true)
                     spazio_movimento_.insert({posizione{x,y}, false});
                 else 

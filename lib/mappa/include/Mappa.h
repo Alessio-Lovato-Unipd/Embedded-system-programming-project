@@ -72,6 +72,8 @@ public:
     double fattore_scala_campo_repulsivo() const {return fattore_scala_campo_repulsivo_;};
     // Ritorna il valore della distanza alla quale un ostacolo è percepito nella mappa
     double distanza_minima_ostacolo() const {return distanza_minima_ostacolo_percepito_;};
+	//Ritorna il numero di celle da usare come incremento per i bordi
+	int incremento_bordi() const {return incremento_mappa_;};
     /* Fine funzioni accesso dati */
 
     /*Funzione per stampare la mappa in un file di testo

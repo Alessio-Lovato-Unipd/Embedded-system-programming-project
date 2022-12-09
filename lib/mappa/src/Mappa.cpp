@@ -1,15 +1,18 @@
-#include "mappa.h"
+#include "Mappa.h"
 
-mappa::mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri)
-        : dimensione_celle_metri_{dimensione_celle_in_metri} {
+Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, int fattore_minimo_scala_celle, double fattore_scala_campo_attrattivo,
+    double fattore_scala_campo_repulsivo, double distanza_minima_ostacolo_percepito, int incremento_celle_mappa)
+        : dimensione_celle_metri_{dimensione_celle_in_metri}, fattore_minimo_scala_celle_{fattore_minimo_scala_celle},
+          fattore_scala_campo_attrattivo_{fattore_scala_campo_attrattivo}, fattore_scala_campo_repulsivo_{fattore_scala_campo_repulsivo},
+          distanza_minima_ostacolo_percepito_{distanza_minima_ostacolo_percepito}, incremento_mappa_{incremento_celle_mappa} {
 
-    //verifico che la dimensione sia multiplo o sottomultiplo del metro
+    //verifico che la dimensione non sia nulla
     if (dimensione_celle_metri_ == 0.0) {
         std::cerr << "E' stata inserito un valore nullo per la dimensione della cella" << std::endl;
         exit(EXIT_FAILURE);
     }
     
-    if(percorso_file_ostacoli.empty()) {
+    if (percorso_file_ostacoli.empty()) {
         std::cerr << "Il percorso del file contenente gli ostacoli è nullo" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -20,40 +23,38 @@ mappa::mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri)
         exit(EXIT_FAILURE);
     } 
 
-    //vettore contenente le posizioni degli ostacoli
     crea_set_ostacoli(file);
         
     file.close();
 
-    //incremento i valori per avere dimensioni maggiori nel caso avessi ostacoli alle estremità
-    // e rendo i numeri interi così da non aver problemi di mcm nel caso la dimensione degli ostacoli non combaciasse con le celle
+    //Rendo minimo e massimo della mappa pari ai valori minimo e massimo delle posizioni degli ostacoli, con un incremento
     minimo_mappa_ = {min_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first - (incremento_mappa * dimensione_celle_metri_),
+                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first - (incremento_mappa_ * dimensione_celle_metri_),
                     min_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second - (incremento_mappa * dimensione_celle_metri_)};
+                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second - (incremento_mappa_ * dimensione_celle_metri_)};
        
     massimo_mappa_ = {max_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first + (incremento_mappa * dimensione_celle_metri_),
+                                [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first + (incremento_mappa_ * dimensione_celle_metri_),
                     max_element(ostacoli.begin(), ostacoli.end(), 
-                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second + (incremento_mappa * dimensione_celle_metri_)};
-    //prevengo creazione mappa senza ostacoli e senza incremento
-    if (ostacoli.empty() && incremento_mappa == 0.0) {
+                                [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second + (incremento_mappa_ * dimensione_celle_metri_)};
+    
+    //prevengo creazione Mappa senza ostacoli e senza incremento
+    if (ostacoli.empty() && incremento_mappa_ == 0.0) {
         minimo_mappa_ = {0.0, 0.0};
-        massimo_mappa_ = {fattore_scala_celle_minimo * dimensione_celle_metri_, fattore_scala_celle_minimo * dimensione_celle_metri_};
+        massimo_mappa_ = {fattore_minimo_scala_celle_ * dimensione_celle_metri_, fattore_minimo_scala_celle_ * dimensione_celle_metri_};
     }
 
-    //creo la mappa 
-    if (dimensione_celle_metri_ > ((massimo_mappa_.first - minimo_mappa_.first)/fattore_scala_celle_minimo) ||
-        dimensione_celle_metri_ > ((massimo_mappa_.second - minimo_mappa_.second)/fattore_scala_celle_minimo)) {
+    //verifico che il rapporto tra celle e dimensione della Mappa non sia minore di un valore preimpostato
+    if (dimensione_celle_metri_ > ((massimo_mappa_.first - minimo_mappa_.first)/fattore_minimo_scala_celle_) ||
+        dimensione_celle_metri_ > ((massimo_mappa_.second - minimo_mappa_.second)/fattore_minimo_scala_celle_)) {
             std::cerr << "E' stata inserita una dimensione delle celle troppo elevata" << endl;
             exit(EXIT_FAILURE);
-        }
-
-    inserisci_celle(minimo_mappa_, massimo_mappa_);
-        
+    }
+    //creo la mappa
+    inserisci_celle(minimo_mappa_, massimo_mappa_);       
 }
 
-void mappa::crea_set_ostacoli(std::ifstream &file){
+void Mappa::crea_set_ostacoli(std::ifstream &file){
     string line;
    
     while (getline(file, line)) {
@@ -69,22 +70,21 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         virgola_successiva = line.find(',', virgola + 1);
 		    double y2{stof(line.substr(virgola + 1, virgola_successiva))};
 
-        //calcolo celle da inserire
+        //verifica dimensione valori
         posizione x{std::minmax(x1,x2)};
         posizione y{std::minmax(y1,y2)};
 
-        //gestione della possibile incongruenza tra dimensione ostacolo e dimensione celle
+        //calcolo i punti estrmi dell'ostacolo
         posizione max{x.second, y.second};
         posizione min{x.first, y.first};
 
-        centra_posizione(max.first, mappa::tipo_posizione::massimo);
-        centra_posizione(max.second, mappa::tipo_posizione::massimo);
-        centra_posizione(min.first, mappa::tipo_posizione::minimo);
-        centra_posizione(min.second, mappa::tipo_posizione::minimo);
-        //fattore correttivo per il minimo
+        //discretizzo gli estremi dell'ostacolo in funzione della griglia
+        centra_posizione(max.first, Mappa::tipo_posizione::massimo);
+        centra_posizione(max.second, Mappa::tipo_posizione::massimo);
+        centra_posizione(min.first, Mappa::tipo_posizione::minimo);
+        centra_posizione(min.second, Mappa::tipo_posizione::minimo);
 
-        //inserisco ostacoli mettendo un incremento della cella di dimensione/2 in modo da ottenere
-        // il riferimento della posizione coincidente con la posizione in metri della cella
+        //inserisco tutte le celle che rappresentano l'ostacolo nel set dedicato agli ostacoli
         for (posizione pos{min}; pos.first <= max.first; pos.first += dimensione_celle_metri_) {
             while (pos.second <= max.second) {
                 ostacoli.insert(pos);
@@ -96,13 +96,7 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
 
 }
 
-void stampa_vettore_ostacoli(const set<posizione> &ostacoli) {
-      for (auto elemento : ostacoli)
-        cout << "x: " << elemento.first <<"  y: " << elemento.second << endl;
-    cout << endl;
-}
-
-void mappa::centra_posizione (double &valore, const tipo_posizione tipo) {
+void Mappa::centra_posizione (double &valore, const tipo_posizione tipo) const {
     double limite{valore};
     limite /= dimensione_celle_metri_;
         if (tipo == tipo_posizione::centro) {
@@ -134,8 +128,7 @@ void mappa::centra_posizione (double &valore, const tipo_posizione tipo) {
     valore = limite;
 }
 
-void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
-    //mi posiziono con i valori al centro della prima cella, che corrisponde alla sua posizione
+void Mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
     for (auto x{minimo.first}; x <= massimo.first; x += dimensione_celle_metri_) {
         for(auto y{minimo.second}; y <= massimo.second; y += dimensione_celle_metri_) {
             if (ostacoli.contains(posizione{x,y}) == true)
@@ -147,8 +140,8 @@ void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
 }
 
 
-void mappa::stampa_mappa(std::string filename) {
-    std::ofstream file(filename, std::ios::out);
+void Mappa::stampa_mappa(string nome_file) const {
+    std::ofstream file(nome_file, std::ios::out);
     if (!file.is_open()) {
         std::cerr << "Impossibile stampare mappa, il file non è presente!" << std::endl;
         return;
@@ -159,7 +152,7 @@ void mappa::stampa_mappa(std::string filename) {
     // 2 -> robot
     for (auto y{massimo_mappa_.second}; y >= minimo_mappa_.second; y -= dimensione_celle_metri_) {
         for(auto x{minimo_mappa_.first}; x <= massimo_mappa_.first; x += dimensione_celle_metri_) {
-            if (contains_robot(posizione{x, y}))
+            if (contiene_robot(posizione{x, y}))
                 file << "2";
             else
                 file << !spazio_movimento_.at(posizione{x, y});
@@ -169,10 +162,15 @@ void mappa::stampa_mappa(std::string filename) {
     file.close();        
 }
 
-void mappa::aggiorna_mappa(const mappa &riferimento) {
+void Mappa::aggiorna_mappa (const Mappa &riferimento) {
     std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_[elemento.first] = elemento.second;});
     minimo_mappa_ = riferimento.posizione_minima();
     massimo_mappa_ = riferimento.posizione_massima();
-    cancella_robot();
+    robot.clear();
+    std::for_each(riferimento.robot_cbegin(), riferimento.robot_cend(), [this](auto &el) {posiziona_robot_cella(el);});
+}
+
+void Mappa::aggiorna_posizione_robot_mappa (const Mappa & riferimento) {
+    robot.clear();
     std::for_each(riferimento.robot_cbegin(), riferimento.robot_cend(), [this](auto &el) {posiziona_robot_cella(el);});
 }

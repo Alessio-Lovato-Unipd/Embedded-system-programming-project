@@ -137,10 +137,16 @@ void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
         
         //attendo mutex per leggere posizioni robot aggiornate
         //scarico mappa aggiornata
-        mappa_.aggiorna_mappa(mappa_condivisa);
-		//cancello la mia posizione dalla mappa
-		for (auto &elemento : celle_occupate_)
-                mappa_.libera_cella_robot(elemento);
+        if (mappa_.posizione_minima().first == mappa_condivisa.posizione_minima().first && mappa_.posizione_minima().second == mappa_condivisa.posizione_minima().second &&
+            mappa_.posizione_massima().first == mappa_condivisa.posizione_massima().first && mappa_.posizione_massima().second == mappa_condivisa.posizione_massima().second) {
+            
+            mappa_.aggiorna_posizione_robot_mappa(mappa_condivisa);
+        } else {
+                mappa_.aggiorna_mappa(mappa_condivisa);
+        }
+	//cancello la mia posizione dalla mappa
+	for (auto &elemento : celle_occupate_)
+        mappa_.libera_cella_robot(elemento);
         //aggiorno i campi di potenziale dovuti alla presenza dei robot
         aggiorna_campi_potenziale(potenziali_celle);
         //evito di andare in diagonale se ostacolo presente nelle celle "a croce"
@@ -170,7 +176,7 @@ void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
         for (auto &elemento : celle_occupate_)
                 mappa_.posiziona_robot_cella(elemento);
         //aggiorno mappa
-        mappa_condivisa.aggiorna_mappa(mappa_);
+        mappa_condivisa.aggiorna_posizione_robot_mappa(mappa_);
         //rilascio chiave mutex
         //salvo la posizione precedente per evitare minimo locali
         posizioni_precedenti.insert(prossima_cella);
@@ -231,7 +237,7 @@ bool Robot::collisione(const posizione &cella) const{
 	set<posizione> prossime_posizioni{celle_adiacenti(cella)};
 	for (auto pos{prossime_posizioni.cbegin()}; pos != prossime_posizioni.cend(); pos++){
 		if (mappa_.contiene_cella(*pos)) {
-			if (mappa_.contains_robot(*pos) || !mappa_.cella_libera(*pos))
+			if (mappa_.contiene_robot(*pos) || !mappa_.cella_libera(*pos))
 				return true;
 		}
 	}

@@ -1,8 +1,6 @@
 todo:
 
-- mplementare dimensione minima se non ho ostacoli cella
-- gestire sottomultipli del metro
-- vedere cos succede se metto ostacolo su unico punto
+-implementare dimensione robot maggiore cella e rimuovere posizioni reali
 
 
 concorrenza:

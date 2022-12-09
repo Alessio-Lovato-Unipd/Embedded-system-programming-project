@@ -27,11 +27,10 @@ private:
     posizione obbiettivo_celle_;
     posizione obbiettivo_reale_;
     mappa mappa_;
-    float raggio_;
+    double raggio_;
     set<posizione> posizioni_precedenti;
 
     void incrementa_mappa(const posizione &posizione_necessaria);
-    void centra_posizione(distanza &pos);
     void inserisci_dati_robot_su_mappa(posizione &pos, string oggetto);
     float campo_attrattivo(const posizione &partenza, const posizione &arrivo) const;
     distanza calcolo_distanza(const posizione &partenza, const posizione &arrivo) const;

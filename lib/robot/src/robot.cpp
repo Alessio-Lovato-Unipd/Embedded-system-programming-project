@@ -7,14 +7,6 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, mappa &mappa_r
         inserisci_dati_robot_su_mappa(robot_celle_, "Il robot");
         inserisci_dati_robot_su_mappa(obbiettivo_celle_, "L'obbiettivo"); 
 
-        if (!mappa_.cella_libera(obbiettivo_celle_)) {
-                std::cerr << "L'obiettivo impostato si trova sopra un ostacolo" << endl;
-                exit(EXIT_FAILURE);
-        }   
-        if (!mappa_.cella_libera(robot_celle_)) {
-                std::cerr << "Il punto di partenza impostato si trova sopra un ostacolo" << endl;
-                exit(EXIT_FAILURE);
-        }
         mappa_.posiziona_robot_cella(robot_celle_);
 
         //attendo mutex per aggiornare mappa
@@ -28,42 +20,23 @@ void Robot::incrementa_mappa(const posizione &posizione_necessaria) {
                          std::min(posizione_necessaria.second, mappa_.posizione_minima().second)};
         posizione massima{std::max(posizione_necessaria.first, mappa_.posizione_massima().first),
                          std::max(posizione_necessaria.second, mappa_.posizione_massima().second)};
-        //inserisco nuovamente incrementi
-        if (minima.first < mappa_.posizione_minima().first)
-                minima.first -= mappa_.incremento_mappa_default();
-        if (minima.second < mappa_.posizione_minima().second)
-                minima.second -= mappa_.incremento_mappa_default();
-        if (massima.first > mappa_.posizione_massima().first)
-                massima.first += mappa_.incremento_mappa_default();
-        if (massima.second > mappa_.posizione_massima().second)
-                massima.second += mappa_.incremento_mappa_default();
         
         mappa_.aggiorna_dimensioni(minima, massima);
         //inserisco le celle mancanti sovrascivendo le precedenti
         mappa_.inserisci_celle(minima, massima);
 }
 
-void Robot::centra_posizione(distanza &pos) {
-        pos /= mappa_.dimensione_celle_metri();
-        pos = arrotonda_valore(pos, (pos <= 0.0) ? true : false);
-        pos *= mappa_.dimensione_celle_metri();
-}
-
 void Robot::inserisci_dati_robot_su_mappa(posizione &pos, string oggetto) {
         //localizzo robot nelle celle
-        centra_posizione(pos.first);
-        centra_posizione(pos.second);
+        mappa_.centra_posizione(pos.first, mappa::tipo_posizione::centro);
+        mappa_.centra_posizione(pos.second, mappa::tipo_posizione::centro);
 
         if (!mappa_.contiene_cella(pos))
                 incrementa_mappa(pos);
         else if (!mappa_.cella_libera(pos)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
                 std::cerr << oggetto << " è stato inserito in una posizione occupata da un ostacolo" << std::endl;
                 exit(EXIT_FAILURE);
-        }
-
-        //incremento in modo che la posizione del robot sia al centro di una cella
-        pos.first += (((pos.first <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));
-        pos.second += (((pos.second <= 0.0) ? (mappa_.dimensione_mezza_cella()) : (-mappa_.dimensione_mezza_cella())));       
+        }   
 
 }
 
@@ -76,7 +49,7 @@ distanza Robot::calcolo_distanza(const posizione &partenza, const posizione &arr
 }
 
 pair<posizione, distanza> Robot::oggetto_piu_vicino(const posizione &attuale, const set<posizione>::const_iterator &inizio_set, const set<posizione>::const_iterator &fine_set) {
-        map<posizione, float> distanza_ostacolo;
+        map<posizione, distanza> distanza_ostacolo;
         std::for_each(inizio_set, fine_set, [this, &attuale, &distanza_ostacolo](auto pos) {distanza_ostacolo[pos] = calcolo_distanza(attuale, pos);});
         auto elemento_minimo {min_element(distanza_ostacolo.cbegin(), distanza_ostacolo.cend(), [](auto &lhs, auto &rhs) { return lhs.second < rhs.second;})};
         return pair{elemento_minimo->first, elemento_minimo->second};
@@ -186,30 +159,37 @@ void Robot::sposta_su_cella_successiva(mappa &mappa_condivisa){
 
 void Robot::limita_spostamenti(map<posizione, dati_cella> &potenziali_celle) {
         //cella ++
+
         posizione da_verificare{robot_celle_.first + mappa_.dimensione_celle_metri(), robot_celle_.second + mappa_.dimensione_celle_metri()};
-        posizione limite1{da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
-        posizione limite2{da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
-        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
-                potenziali_celle.erase(da_verificare);
+        if (potenziali_celle.contains(da_verificare)) {
+                posizione limite1{da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
+                posizione limite2{da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
+                if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                        potenziali_celle.erase(da_verificare);
+        }
 
         //cella -+
         da_verificare = {robot_celle_.first - mappa_.dimensione_celle_metri(), robot_celle_.second + mappa_.dimensione_celle_metri()};
-        limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
-        limite2 = {da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
-        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
-                potenziali_celle.erase(da_verificare);
-
+        if (potenziali_celle.contains(da_verificare)) {
+                posizione limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
+                posizione limite2 = {da_verificare.first, da_verificare.second - mappa_.dimensione_celle_metri()};
+                if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                        potenziali_celle.erase(da_verificare);
+        }
         //cella --
         da_verificare = {robot_celle_.first - mappa_.dimensione_celle_metri(), robot_celle_.second - mappa_.dimensione_celle_metri()};
-        limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
-        limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
-        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
-                potenziali_celle.erase(da_verificare);
-        
+        if (potenziali_celle.contains(da_verificare)) {
+                posizione limite1 = {da_verificare.first + mappa_.dimensione_celle_metri(), da_verificare.second};
+                posizione limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
+                if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                        potenziali_celle.erase(da_verificare);
+        }
         //cella +-
         da_verificare = {robot_celle_.first + mappa_.dimensione_celle_metri(), robot_celle_.second - mappa_.dimensione_celle_metri()};
-        limite1 = {da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
-        limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
-        if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
-                potenziali_celle.erase(da_verificare);
+        if (potenziali_celle.contains(da_verificare)) {
+                posizione limite1 = {da_verificare.first - mappa_.dimensione_celle_metri(), da_verificare.second};
+                posizione limite2 = {da_verificare.first, da_verificare.second + mappa_.dimensione_celle_metri()};
+                if (!mappa_.cella_libera(limite1) || !mappa_.cella_libera(limite2) || mappa_.contains_robot(limite1) || mappa_.contains_robot(limite2))
+                        potenziali_celle.erase(da_verificare);
+        }
 }

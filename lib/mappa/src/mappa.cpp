@@ -36,7 +36,11 @@ mappa::mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri)
                                 [](auto &lhs, auto &rhs) { return lhs.first < rhs.first; })->first + (incremento_mappa * dimensione_celle_metri_),
                     max_element(ostacoli.begin(), ostacoli.end(), 
                                 [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second + (incremento_mappa * dimensione_celle_metri_)};
-
+    //prevengo creazione mappa senza ostacoli e senza incremento
+    if (ostacoli.empty() && incremento_mappa == 0.0) {
+        minimo_mappa_ = {0.0, 0.0};
+        massimo_mappa_ = {fattore_scala_celle_minimo * dimensione_celle_metri_, fattore_scala_celle_minimo * dimensione_celle_metri_};
+    }
 
     //creo la mappa 
     if (dimensione_celle_metri_ > ((massimo_mappa_.first - minimo_mappa_.first)/fattore_scala_celle_minimo) ||

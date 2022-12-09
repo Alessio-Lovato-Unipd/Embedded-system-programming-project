@@ -12,8 +12,8 @@ Alcuni esempi sono:\
 -1,6,-7,-8 _<--ostacolo 3_\
 1,3,5 _<--ostacolo 4 potenzialmente non rilevato, dipende da dimensione cella_\
 1,3,5,5 _<--non rilevato_\
-1,4,6, _<--verrà generato un errore che interromperà l'esecuzione
-1,4,6,a _<--verrà generato un errore che interromperà l'esecuzione se presente una lettera o simbolo non numerico
+1,4,6, _<--verrà generato un errore che interromperà l'esecuzione_\
+1,4,6,a _<--verrà generato un errore che interromperà l'esecuzione se presente una lettera o simbolo non numerico_
 
 _N.B. La disposizione deve essere (x1,y1,x2,y2) ma non necessariamente x1 < x2 e y1 < y2._
 ***
@@ -54,7 +54,7 @@ Per poter eseguire uno dei test è necessario passare dei dati come argomento:
 * Nome del file dove esportare la griglia stampata testualmente (compresa estensione, consigliata .txt)
 * Dimensione in metri delle celle della mappa che si vuole generare (il separatore decimale può essere sia punto che virgola)
 
-
+***
 
 ### TODO:
 

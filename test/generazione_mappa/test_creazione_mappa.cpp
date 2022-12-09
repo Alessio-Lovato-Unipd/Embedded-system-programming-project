@@ -1,4 +1,4 @@
-#include "mappa.h"
+#include "Mappa.h"
 #include "gnuplot.h"
 #include <iostream>
 
@@ -7,7 +7,7 @@ using std::cerr;
 using std::string;
 using std::cout;
 
-void stampa_gnuplot(mappa &map) {
+void stampa_gnuplot(Mappa &map) {
     //stampa dei fati necessari per il grafico
     std::ofstream file("gnuplot_raw.dat", std::ios::out);
     if (!file.is_open()) {
@@ -21,7 +21,7 @@ void stampa_gnuplot(mappa &map) {
     for (double x{map.posizione_minima().first}; x <= map.posizione_massima().first; x += map.dimensione_celle_metri()) {
         for(double y = map.posizione_minima().second; y <= map.posizione_massima().second; y += map.dimensione_celle_metri()) {
           file << x << " " << y << " ";
-          if (map.contains_robot(posizione{x,y}))
+          if (map.contiene_robot(posizione{x,y}))
             file << "2";
           else
             file << map.cella_libera(posizione{x,y});
@@ -70,10 +70,9 @@ int main(int argc, char *argv[]) {
 
 
     //mappa
-    mappa griglia{argv[1], std::stof(argv[3])};
-    griglia.stampa_ostacoli();
+    Mappa griglia{argv[1], std::stof(argv[3])};
 
-    //stampa dimensioni griglia
+    //stampa dimensioni griglia   griglia.stampa_ostacoli();
     cout << "Minimo griglia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl
     << "Massimo griglia--> x: " << griglia.posizione_massima().first << "  y: " << griglia.posizione_massima().second << endl;
 

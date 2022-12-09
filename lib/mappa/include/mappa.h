@@ -39,7 +39,12 @@ public:
     void imposta_fattore_scala_repulsivo(double valore) {fattore_scala_campo_repulsivo_ = valore;};
     void imposta_fattore_scala_attrattivo(double valore) {fattore_scala_campo_attrattivo_ = valore;};
     void imposta_distanza_minima_ostacolo_percepito_(double valore) {distanza_minima_ostacolo_percepito_ = valore;};
-    void centra_posizione (double &valore);
+    /*Specifica nella funzione "centra_posizione() quale tipo di calcolo fare:
+    - Minimo e massimo vengono utilizzati con gli ostacoli per indicare quale punto stiamo modificando
+    - Centro serve per le posizioni singole"
+    */
+    enum class tipo_posizione {minimo, massimo,centro};
+    void centra_posizione (double &valore, const tipo_posizione tipo);
 
     //implementazione per robot
     bool contiene_cella(const posizione &pos) const {return spazio_movimento_.contains(pos);};

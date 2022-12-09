@@ -73,15 +73,16 @@ void mappa::crea_set_ostacoli(std::ifstream &file){
         posizione max{x.second, y.second};
         posizione min{x.first, y.first};
 
-        centra_posizione(max.first);
-        centra_posizione(max.second);
-        centra_posizione(min.first);
-        centra_posizione(min.second);
+        centra_posizione(max.first, mappa::tipo_posizione::massimo);
+        centra_posizione(max.second, mappa::tipo_posizione::massimo);
+        centra_posizione(min.first, mappa::tipo_posizione::minimo);
+        centra_posizione(min.second, mappa::tipo_posizione::minimo);
+        //fattore correttivo per il minimo
 
         //inserisco ostacoli mettendo un incremento della cella di dimensione/2 in modo da ottenere
         // il riferimento della posizione coincidente con la posizione in metri della cella
-        for (posizione pos{min}; pos.first < max.first; pos.first += dimensione_celle_metri_) {
-            while (pos.second < max.second) {
+        for (posizione pos{min}; pos.first <= max.first; pos.first += dimensione_celle_metri_) {
+            while (pos.second <= max.second) {
                 ostacoli.insert(pos);
                 pos.second += dimensione_celle_metri_;
             }
@@ -97,39 +98,47 @@ void stampa_vettore_ostacoli(const set<posizione> &ostacoli) {
     cout << endl;
 }
 
-void mappa::centra_posizione (double &valore) {
+void mappa::centra_posizione (double &valore, const tipo_posizione tipo) {
     double limite{valore};
     limite /= dimensione_celle_metri_;
-    if (valore < 0.0)
-        limite = floor(limite);
-    else
-        limite = ceil(limite);
+        if (tipo == tipo_posizione::centro) {
+            if (valore < 0.0)
+                limite = floor(limite);
+            else
+                limite = ceil(limite);
 
-    limite *= dimensione_celle_metri_;
-    if (valore < 0.0)
-        limite -= dimensione_mezza_cella_;
-    else
-        limite += dimensione_mezza_cella_;
-
+            limite *= dimensione_celle_metri_;
+            if (valore < 0.0)
+                limite += dimensione_mezza_cella_;
+            else
+                limite -= dimensione_mezza_cella_;
+        } else if (tipo == tipo_posizione::minimo) {
+            if (valore < 0.0)
+                limite = ceil(limite);
+            else
+                limite = floor(limite);
+            limite *= dimensione_celle_metri_;
+            limite += dimensione_mezza_cella_;
+        } else {
+            if (valore < 0.0)
+               limite = floor(limite);
+            else
+                limite = ceil(limite);
+            limite *= dimensione_celle_metri_;
+            limite -= dimensione_mezza_cella_;
+        }
     valore = limite;
 }
 
 void mappa::inserisci_celle(const posizione &minimo, const posizione &massimo) {
-        posizione casella_corrente{minimo};
-        //mi posiziono con i valori al centro della prima cella, che corrisponde alla sua posizione
-        casella_corrente.first += dimensione_mezza_cella_;
-        casella_corrente.second += dimensione_mezza_cella_;
-        while (casella_corrente.first < massimo.first) {
-            while (casella_corrente.second < massimo.second)
-            {
-                if (ostacoli.contains(casella_corrente) == true)
-                    spazio_movimento_.insert({casella_corrente, false});
+    //mi posiziono con i valori al centro della prima cella, che corrisponde alla sua posizione
+    for (auto x{minimo.first}; x <= massimo.first; x += dimensione_celle_metri_) {
+        for(auto y{minimo.second}; y <= massimo.second; y += dimensione_celle_metri_) {
+            if (ostacoli.contains(posizione{x,y}) == true)
+                    spazio_movimento_.insert({posizione{x,y}, false});
                 else 
-                    spazio_movimento_.insert({casella_corrente, true});
-                casella_corrente.second += dimensione_celle_metri_;
-            }
-        casella_corrente.first += dimensione_celle_metri_;
-        casella_corrente.second = minimo.second + dimensione_mezza_cella_;
+                    spazio_movimento_.insert({posizione{x,y}, true});
+        }
     }
 }
 
@@ -143,18 +152,15 @@ void mappa::stampa_mappa(std::string filename) {
     //ciclo stampa valori
     // 0 -> no ostacoli
     // 1 -> ostacoli
-    posizione stampa{minimo_mappa_.first + dimensione_mezza_cella_, massimo_mappa_.second - dimensione_mezza_cella_};
-    while (stampa.second > minimo_mappa_.second) {
-        while(stampa.first < massimo_mappa_.first) {
-            if (contains_robot(stampa))
+    // 2 -> robot
+    for (auto y{massimo_mappa_.second}; y >= minimo_mappa_.second; y -= dimensione_celle_metri_) {
+        for(auto x{minimo_mappa_.first}; x <= massimo_mappa_.first; x += dimensione_celle_metri_) {
+            if (contains_robot(posizione{x, y}))
                 file << "2";
             else
-                file << !spazio_movimento_.at(stampa);
-            stampa.first += dimensione_celle_metri_;
+                file << !spazio_movimento_.at(posizione{x, y});
         }
         file << endl;
-        stampa.second -= dimensione_celle_metri_;
-        stampa.first = minimo_mappa_.first + dimensione_mezza_cella_;
     }
     file.close();        
 }

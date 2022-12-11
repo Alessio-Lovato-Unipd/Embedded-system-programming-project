@@ -20,12 +20,12 @@ void stampa_gnuplot(Mappa &map) {
     // 2 -> robot
     for (double x{map.posizione_minima().first}; x <= map.posizione_massima().first; x += map.dimensione_celle_metri()) {
         for(double y = map.posizione_minima().second; y <= map.posizione_massima().second; y += map.dimensione_celle_metri()) {
-          file << x << " " << y << " ";
-          if (map.contiene_robot(posizione{x,y}))
-            file << "2";
-          else
-            file << map.cella_libera(posizione{x,y});
-          file << endl;
+          	file << x << " " << y << " ";
+          	if (map.contiene_robot(posizione{x,y}))
+            	file << "2";
+          	else
+            	file << map.cella_libera(posizione{x,y});
+          	file << endl;
         }
         file << endl;
     }
@@ -35,38 +35,38 @@ void stampa_gnuplot(Mappa &map) {
     //stampa grafico
     stampa_grafico(map.posizione_minima().first - map.dimensione_mezza_cella(),map.posizione_minima().second - map.dimensione_mezza_cella(),
                   map.posizione_massima().first + map.dimensione_mezza_cella(), map.posizione_massima().second + map.dimensione_mezza_cella(),
-                  map.dimensione_celle_metri());
+                  map.dimensione_celle_metri(), gnuplot::tipo_stampa::persist);
   
 }
 
 
 int main(int argc, char *argv[]) {
-  if (argc <4 || argc >4) {
-    cerr << "Deve essere inserito il percorso del file da cui ricavare gli ostacoli e nient'altro." << endl;
-    exit(EXIT_FAILURE);
-  }
+	if (argc <4 || argc >4) {
+		cerr << "Deve essere inserito il percorso del file da cui ricavare gli ostacoli e nient'altro." << endl;
+		exit(EXIT_FAILURE);
+	}
 
-  //controllo se la dimensione inserita è un numero
-  string dimensione{argv[3]};
-  bool primo_punto{true};
- for (auto elemento : dimensione) {
-    if ((isdigit(elemento) == 0)){ // il carattere non è un digit
-      if (elemento == '.' or elemento == ',') {
-        if (!primo_punto) {
-          cerr << "Inserito un valore dimensionale con più punti" << endl;
-          exit(EXIT_FAILURE);
-        } else {
-          primo_punto = false;
-        }
-      } else if (elemento == '-') {
-          cerr << "Inserito un valore dimensionale negativo" << endl;
-          exit(EXIT_FAILURE);
-      } else {
-        cerr << "Inserito un valore dimensionale non numerico" << endl;
-        exit(EXIT_FAILURE);
-      }
-    }
- }
+	//controllo se la dimensione inserita è un numero
+	string dimensione{argv[3]};
+	bool primo_punto{true};
+	for (auto elemento : dimensione) {
+		if ((isdigit(elemento) == 0)){ // il carattere non è un digit
+			if (elemento == '.' or elemento == ',') {
+				if (!primo_punto) {
+					cerr << "Inserito un valore dimensionale con più punti" << endl;
+					exit(EXIT_FAILURE);
+				} else {
+					primo_punto = false;
+				}
+			} else if (elemento == '-') {
+				cerr << "Inserito un valore dimensionale negativo" << endl;
+				exit(EXIT_FAILURE);
+			} else {
+				cerr << "Inserito un valore dimensionale non numerico" << endl;
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
 
 
     //mappa

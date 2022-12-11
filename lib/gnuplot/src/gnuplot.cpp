@@ -1,9 +1,13 @@
 #include "gnuplot.h"
 #include <unistd.h>
 
-gnuplot::gnuplot()
-    //    : gnuplotpipe {popen ("gnuplot -persist", "w")} {
-            : gnuplotpipe {popen ("gnuplot", "w")} {
+gnuplot::gnuplot(const tipo_stampa stampa)
+{
+    if (stampa == tipo_stampa::persist)
+        gnuplotpipe = popen("gnuplot -persist", "w");
+    else
+        gnuplotpipe = popen("gnuplot", "w");
+
     if (!gnuplotpipe)
         std::cerr << ("Gnuplot non trovato!");
 }
@@ -18,12 +22,17 @@ void gnuplot::operator() (const std::string &command) {
     fflush(gnuplotpipe);
 }
 
-void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float dimensione_celle) {
-    gnuplot p;
+void stampa_grafico(double min_x, double min_y, double max_x, double max_y, double dimensione_celle, const gnuplot::tipo_stampa tipo_output) {
+    gnuplot p(tipo_output);
     p("set palette defined (0 \"black\", 1 \"white\", 2 \"dark-green\")");
-    p("set title \"Mappa degli ostacoli\"");
+    std::string comando {"set title \"Mappa degli ostacoli - dimesione celle: "};
+    comando.append(std::to_string(dimensione_celle)).append(" [m]\"");
+    p(comando);
+    p("set xlabel \"X [m]\"");
+    p("set ylabel \"Y [m]\"");
     //unità misura in metri
-    std::string comando{"set xrange["};
+    comando.clear();
+    comando = "set xrange[";
     comando.append(std::to_string(min_x)).append(":").append(std::to_string(max_x)).append("] noreverse nowriteback");
     p(comando);
     comando.clear();
@@ -46,8 +55,11 @@ void stampa_grafico(float min_x, float min_y, float max_x, float max_y, float di
     p("set style line 13 lc rgb 'red' lt 1 lw 1");
     p("set grid front x2tics y2tics ls 13");
     p("set grid front  ");
-    //p("set terminal png size 1920,1080 enhanced font \"Helvetica,10\"");
-    //p("set out \"mappa.png\"");
+    if (tipo_output == gnuplot::tipo_stampa::file) {
+        p("set terminal png size 1920,1080 enhanced font \"Helvetica,10\"");
+        p("set out \"mappa.png\"");
+    }
     p("plot \"gnuplot_raw.dat\" with image notitle");
-    sleep(1);
+    if (tipo_output == gnuplot::tipo_stampa::no_persist)
+        sleep(1);
 }

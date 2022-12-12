@@ -39,7 +39,7 @@ Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, in
                                 [](auto &lhs, auto &rhs) { return lhs.second < rhs.second; })->second + (incremento_mappa_ * dimensione_celle_metri_)};
     
     //prevengo creazione Mappa senza ostacoli e senza incremento
-    if (ostacoli.empty() && incremento_mappa_ == 0.0) {
+    if (ostacoli.empty()) {
         minimo_mappa_ = {0.0, 0.0};
         massimo_mappa_ = {fattore_minimo_scala_celle_ * dimensione_celle_metri_, fattore_minimo_scala_celle_ * dimensione_celle_metri_};
     }

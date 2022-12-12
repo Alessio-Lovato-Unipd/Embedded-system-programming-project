@@ -11,6 +11,10 @@ Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, in
         std::cerr << "E' stata inserito un valore nullo per la dimensione della cella" << std::endl;
         exit(EXIT_FAILURE);
     }
+    if (fattore_minimo_scala_celle_ == 0.0) {
+        std::cerr << "E' stata inserito un numero minimo di celle nullo" << std::endl;
+        exit(EXIT_FAILURE);
+    }
     
     if (percorso_file_ostacoli.empty()) {
         std::cerr << "Il percorso del file contenente gli ostacoli è nullo" << std::endl;

@@ -17,7 +17,7 @@ public:
 	  	- robot: posizione (x,y) alla quale si trova il robot
 		- obbiettivo: posizione (x,y) alla quale deve arrivare il robot
 		- mappa riferimento: mappa alla quale riferirsi
-		- [facoltativo] raggio_robot: dimensione del robot (essendo cilindrico il raggio)
+		- [facoltativo] raggio_robot: dimensione del robot (essendo cilindrico il raggio) in metri
 	*/
     Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_riferimento, const float raggio_robot = 0.5f);
 
@@ -26,7 +26,7 @@ public:
 	  	- mappa_condivisa: mappa sulla quale fanno riferimento i robot
 		- potenziali_celle: mappa contenente le informazioni delle celle adiacenti alla posizione centrale del robot
 	  Output:
-	  	Ritorna true se il posizionamento è stato eseguito correttamente, altrimenti false
+	  	Ritorna true se il posizionamento è stato eseguito correttamente, altrimenti ritorna false e stampa l'errore
 	*/
     bool sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle);
 

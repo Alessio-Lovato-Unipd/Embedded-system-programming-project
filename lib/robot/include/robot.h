@@ -7,6 +7,7 @@
 typedef float distanza;
 //first == distanza, second == potenziale
 typedef pair<distanza, float> dati_cella;
+typedef map<posizione, dati_cella> mappa_potenziali;
 
 
 class Robot {
@@ -23,8 +24,16 @@ public:
 	/*Funzione per spostare il robot alla cella circostante con potenziale minore rispetto all'obbiettivo
 	  Parametri:
 	  	- mappa_condivisa: mappa sulla quale fanno riferimento i robot
+		- potenziali_celle: mappa contenente le informazioni delle celle adiacenti alla posizione centrale del robot
+	  Output:
+	  	Ritorna true se il posizionamento è stato eseguito correttamente, altrimenti false
 	*/
-    void sposta_su_cella_successiva(Mappa &mappa_condivisa);
+    bool sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle);
+
+	/*Funzione per calcolare il potenziale delle celle adiacenti alla posizione centrale attuale del robot. Il calcolo
+	  viene eseguito solo rispetto agli ostacoli e non ai robot.
+	*/
+    mappa_potenziali calcola_potenziali_celle_adiacenti() ;
 
 	/*Funzioni accesso dati*/
 	// Ritorna l'elenco delle celle occupate dal robot
@@ -81,11 +90,6 @@ private:
 	*/
     pair<posizione, distanza> oggetto_piu_vicino(const posizione &attuale, const set<posizione>::const_iterator &inizio_set,
 													const set<posizione>::const_iterator &fine_set);
-	
-	/*Funzione per calcolare il potenziale delle celle adiacenti alla posizione centrale attuale del robot. Il calcolo
-	  viene eseguito solo rispetto agli ostacoli e non ai robot.
-	*/
-    map<posizione, dati_cella> calcola_potenziali_celle_adiacenti() ;
 
 	/*Funzione per ricalcolare il campo di potenziale su una cella rispetto ad un nuovo ostacolo o robot
 	  Parametri:
@@ -99,14 +103,14 @@ private:
 	  Parametri:
 	  	-celle con potenziali: mappa con le celle calcolate in precedenza tramite la funzione 'calcola_potenziali_celle_adaicenti()'
 	*/
-    void aggiorna_campi_potenziale(map<posizione, dati_cella> &celle_con_potenziali);
+    void aggiorna_campi_potenziale(mappa_potenziali &celle_con_potenziali);
 
     /*Funzione per verificare che il robot non faccia uno spostamento diagonale se adiacente ad
     un altro robot o ad un ostacolo.
     Parametri:
     - Mappa che rappresenta i possibili spostamenti futuri
     */
-    void limita_spostamenti(map<posizione, dati_cella> &potenziali_celle);
+    void limita_spostamenti(mappa_potenziali &potenziali_celle);
 
     /*Funzione per calcolare la posizione delle celle adiacenti occupate dal robot
       rispetto alla posizione centrale

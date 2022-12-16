@@ -29,7 +29,10 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_r
     //attendo mutex per aggiornare mappa
     mappa_riferimento.aggiorna_mappa(mappa_);
     //rilascio mutex
-
+	//se il robot è abbastanza vicino all'ostacolo elimino la componente repulsiva del campo di forza
+	//per evitare che il robot sia respinto distante dall'obbiettivo
+	if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
+		mappa_.imposta_fattore_scala_repulsivo(0);
 }
 
 void Robot::incrementa_mappa(const posizione &posizione_necessaria) {
@@ -78,13 +81,20 @@ pair<posizione, distanza> Robot::oggetto_piu_vicino(const posizione &attuale, co
 	return pair{elemento_minimo->first, elemento_minimo->second};
 }
 
-map<posizione, dati_cella> Robot::calcola_potenziali_celle_adiacenti () {
-	map<posizione, dati_cella> potenziali;
+mappa_potenziali Robot::calcola_potenziali_celle_adiacenti () {
+	//se il robot è abbastanza vicino all'ostacolo elimino la componente repulsiva del campo di forza
+	//per evitare che il robot sia respinto distante dall'obbiettivo
+	if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
+		mappa_.imposta_fattore_scala_repulsivo(0);
+
+	//salvo la posizione attuale in un elenco di posizioni già effettuate per evitare minimo locali e/o loop
+	posizioni_precedenti.insert(robot_celle_);
+
+	mappa_potenziali potenziali;
 	posizione attuale{robot_celle_};
 	//cancello la mia posizione dalla mappa
-	for (auto &elemento : celle_occupate_) {
+	for (auto &elemento : celle_occupate_)
 	    mappa_.libera_cella_robot(elemento);
-		}
 	pair<posizione, distanza> ostacolo{oggetto_piu_vicino(attuale, mappa_.ostacoli_cbegin(), mappa_.ostacoli_cend())};
 	//cella +/
 	attuale.first += mappa_.dimensione_celle_metri();
@@ -126,7 +136,7 @@ float Robot::ricalcolo_potenziale_cella (const posizione &cella_da_ricalcolare, 
 	return (campo_attrattivo(cella_da_ricalcolare, robot_ostacolo) + campo_repulsivo(cella_da_ricalcolare, robot_ostacolo));
 }
 
-void Robot::aggiorna_campi_potenziale (map<posizione, dati_cella> &celle_con_potenziali) {
+void Robot::aggiorna_campi_potenziale (mappa_potenziali &celle_con_potenziali) {
 	for (auto elemento : celle_con_potenziali) {
 		pair<posizione, distanza> ostacolo{oggetto_piu_vicino(elemento.first, mappa_.robot_cbegin(), mappa_.robot_cend())};
 		if (elemento.second.first > ostacolo.second) {
@@ -137,14 +147,7 @@ void Robot::aggiorna_campi_potenziale (map<posizione, dati_cella> &celle_con_pot
 	}
 }
 
-void Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa){
-
-	//se il robot è abbastanza vicino all'ostacolo elimino la componente repulsiva del campo di forza
-	if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
-		mappa_.imposta_fattore_scala_repulsivo(0);
-	map<posizione, dati_cella> potenziali_celle{calcola_potenziali_celle_adiacenti()};
-	
-	//attendo mutex per leggere posizioni robot aggiornate
+bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle){
 	//scarico mappa aggiornata
 	if (mappa_.posizione_minima().first == mappa_condivisa.posizione_minima().first &&
 		mappa_.posizione_minima().second == mappa_condivisa.posizione_minima().second &&
@@ -174,7 +177,7 @@ void Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa){
 			potenziali_celle.erase(prossima_cella);
 			if (potenziali_celle.empty()) {
 					std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
-					exit(EXIT_FAILURE);
+					return false;
 			}
 			prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 													[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
@@ -188,13 +191,10 @@ void Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa){
 		mappa_.posiziona_robot_cella(elemento);
 	//aggiorno mappa
 	mappa_condivisa.aggiorna_posizione_robot_mappa(mappa_);
-	//rilascio chiave mutex
-	//salvo la posizione precedente per evitare minimo locali
-	posizioni_precedenti.insert(prossima_cella);
-
+	return true;
 }
 
-void Robot::limita_spostamenti(map<posizione, dati_cella> &potenziali_celle) {
+void Robot::limita_spostamenti(mappa_potenziali &potenziali_celle) {
 	//cella ++
 	posizione da_verificare{robot_celle_.first + mappa_.dimensione_celle_metri(), robot_celle_.second + mappa_.dimensione_celle_metri()};
 	if (potenziali_celle.contains(da_verificare)) {

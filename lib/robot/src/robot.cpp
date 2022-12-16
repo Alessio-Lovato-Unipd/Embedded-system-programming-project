@@ -160,7 +160,7 @@ bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali 
 	}
 	//cancello la mia posizione dalla mappa
 	for (auto &elemento : celle_occupate_)
-	mappa_.libera_cella_robot(elemento);
+		mappa_.libera_cella_robot(elemento);
 	//aggiorno i campi di potenziale dovuti alla presenza dei robot
 	aggiorna_campi_potenziale(potenziali_celle);
 	//evito di andare in diagonale se ostacolo presente nelle celle "a croce"
@@ -173,25 +173,29 @@ bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali 
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 							[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
 	//evito minimi locali o robot nelle vicinanze
-		while (posizioni_precedenti.contains(prossima_cella) || collisione(prossima_cella)) {
-			potenziali_celle.erase(prossima_cella);
-			if (potenziali_celle.empty()) {
-					std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
-					return false;
+	bool spostamento{true};
+	while (posizioni_precedenti.contains(prossima_cella) || collisione(prossima_cella)) {
+		potenziali_celle.erase(prossima_cella);
+		if (potenziali_celle.empty()) {
+				std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
+				spostamento = false;
+				break;
 			}
-			prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
-													[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
-		}
-	//salvo la nuova posizione
-	robot_celle_ = {prossima_cella.first, prossima_cella.second};
-	//inserisco tutte le celle occupate dal robot
-	celle_occupate_.clear();
+		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
+												[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
+	}
+	if (spostamento) {
+		//salvo la nuova posizione
+		robot_celle_ = {prossima_cella.first, prossima_cella.second};
+		//inserisco tutte le celle occupate dal robot
+		celle_occupate_.clear();
+	}
 	celle_occupate_ = celle_adiacenti(robot_celle_);
 	for (auto &elemento : celle_occupate_)
 		mappa_.posiziona_robot_cella(elemento);
 	//aggiorno mappa
 	mappa_condivisa.aggiorna_posizione_robot_mappa(mappa_);
-	return true;
+	return spostamento;
 }
 
 void Robot::limita_spostamenti(mappa_potenziali &potenziali_celle) {

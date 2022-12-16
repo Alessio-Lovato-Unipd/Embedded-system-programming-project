@@ -3,6 +3,10 @@
 Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_riferimento, const float raggio_robot)
 	: robot_celle_{robot}, obbiettivo_celle_{obbiettivo}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
 {
+	if (raggio_robot <= 0) {
+		std::cerr << "La dimensione del robot inserita è nulla o negativa" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	//localizzo robot nelle celle
     mappa_.centra_posizione(robot_celle_.first, Mappa::tipo_posizione::centro);
     mappa_.centra_posizione(robot_celle_.second, Mappa::tipo_posizione::centro);

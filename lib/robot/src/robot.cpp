@@ -10,24 +10,21 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_r
 	//localizzo robot nelle celle
     mappa_.centra_posizione(robot_celle_.first, Mappa::tipo_posizione::centro);
     mappa_.centra_posizione(robot_celle_.second, Mappa::tipo_posizione::centro);
-	mappa_.centra_posizione(obbiettivo_celle_.first, Mappa::tipo_posizione::centro);
-    mappa_.centra_posizione(obbiettivo_celle_.second, Mappa::tipo_posizione::centro);
 
-    if (!mappa_.contiene_cella(obbiettivo_celle_))
-		incrementa_mappa(obbiettivo_celle_);
-	else if (!mappa_.cella_libera(obbiettivo_celle_)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
-		std::cerr << "L'obbiettivo è stato inserito in una posizione occupata da un ostacolo" << std::endl;
-		exit(EXIT_FAILURE);
-    }
+    nuovo_obbiettivo(obbiettivo_celle_);
+
 	celle_occupate_ = celle_adiacenti(robot_celle_);
     for (auto &elemento : celle_occupate_) {
-		mappa_.posiziona_robot_cella(elemento);
-			if (!mappa_.contiene_cella(elemento))
-						incrementa_mappa(elemento);
-				else if (!mappa_.cella_libera(elemento)) {//controllo che l'obbiettivo o il robot non siano in un ostacolo
-						std::cerr << "Il robot è stato inserito in una posizione occupata da un ostacolo" << std::endl;
-						exit(EXIT_FAILURE);
-			}   
+			if (!mappa_.contiene_cella(elemento)) {
+				incrementa_mappa(elemento);
+			} else if (!mappa_.cella_libera(elemento)) {//controllo che il robot non sia posizionato su un ostacolo
+				std::cerr << "Il robot è stato inserito in una posizione occupata da un ostacolo" << std::endl;
+				exit(EXIT_FAILURE);
+			} else if (mappa_.contiene_robot(elemento)) {//controllo che il robot non venga posizionato su un altro robot
+				std::cerr << "Il robot è stato inserito in una posizione occupata da un robot" << std::endl;
+				exit(EXIT_FAILURE);
+			}
+			mappa_.posiziona_robot_cella(elemento);  
 	}
     
     //attendo mutex per aggiornare mappa
@@ -37,6 +34,20 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_r
 	//per evitare che il robot sia respinto distante dall'obbiettivo
 	if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
 		mappa_.imposta_fattore_scala_repulsivo(0);
+}
+
+bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
+	posizione nuova{nuovo_obbiettivo};
+	mappa_.centra_posizione(nuova.first, Mappa::tipo_posizione::centro);
+    mappa_.centra_posizione(nuova.second, Mappa::tipo_posizione::centro);
+	if (!mappa_.contiene_cella(nuova))
+		incrementa_mappa(nuova);
+	else if (!mappa_.cella_libera(nuova)) {//controllo che l'obbiettivo non siano in un ostacolo
+		std::cerr << "L'obbiettivo è stato inserito in una posizione occupata da un ostacolo" << std::endl;
+		return false;
+    }
+	obbiettivo_celle_ = nuova;
+	return true;
 }
 
 void Robot::incrementa_mappa(const posizione &posizione_necessaria) {

@@ -1,7 +1,7 @@
 #include "robot.h"
 
-Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_riferimento, const float raggio_robot)
-	: robot_celle_{robot}, obbiettivo_celle_{obbiettivo}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
+Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot)
+	: robot_celle_{robot}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
 {
 	if (raggio_robot <= 0) {
 		std::cerr << "La dimensione del robot inserita è nulla o negativa" << std::endl;
@@ -10,8 +10,6 @@ Robot::Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_r
 	//localizzo robot nelle celle
     mappa_.centra_posizione(robot_celle_.first, Mappa::tipo_posizione::centro);
     mappa_.centra_posizione(robot_celle_.second, Mappa::tipo_posizione::centro);
-
-    nuovo_obbiettivo(obbiettivo_celle_);
 
 	celle_occupate_ = celle_adiacenti(robot_celle_);
     for (auto &elemento : celle_occupate_) {
@@ -47,6 +45,7 @@ bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 		return false;
     }
 	obbiettivo_celle_ = nuova;
+	obbiettivo_stabilito_ = true;
 	return true;
 }
 
@@ -83,10 +82,6 @@ float Robot::campo_repulsivo(const posizione &partenza, const posizione &arrivo)
 		return ((mappa_.fattore_scala_campo_repulsivo()*pow(((1/dist)+(1/mappa_.distanza_minima_ostacolo())),2.0f))/2.0f);
 	else
 		return 0.0;
-}
-
-distanza Robot::calcolo_distanza(const posizione &partenza, const posizione &arrivo) const {
-	return (sqrt(pow((arrivo.first - partenza.first), 2.0f) + pow((arrivo.second - partenza.second), 2.0f)));
 }
 
 pair<posizione, distanza> Robot::oggetto_piu_vicino(const posizione &attuale, const set<posizione>::const_iterator &inizio_set, const set<posizione>::const_iterator &fine_set) {
@@ -163,6 +158,10 @@ void Robot::aggiorna_campi_potenziale (mappa_potenziali &celle_con_potenziali) {
 }
 
 bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle){
+	if (!obbiettivo_stabilito_) {
+		std::cerr << "Non è stato assegnato un obbiettivo al robot" << endl;
+		return false;
+	}
 	//scarico mappa aggiornata
 	if (mappa_.posizione_minima().first == mappa_condivisa.posizione_minima().first &&
 		mappa_.posizione_minima().second == mappa_condivisa.posizione_minima().second &&
@@ -182,11 +181,13 @@ bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali 
 	limita_spostamenti(potenziali_celle);
 	//calcolo posizione futura
 	posizione prossima_cella;
-	if (potenziali_celle.contains(obbiettivo_celle_))
-		prossima_cella = {obbiettivo_celle_.first, obbiettivo_celle_.second};
-	else
+	if (potenziali_celle.contains(obbiettivo_celle_)) {
+		prossima_cella = obbiettivo_celle_;
+		obbiettivo_stabilito_ = false;
+	} else {
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 							[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
+	}
 	//evito minimi locali o robot nelle vicinanze
 	bool spostamento{true};
 	while (posizioni_precedenti.contains(prossima_cella) || collisione(prossima_cella)) {
@@ -271,4 +272,8 @@ bool Robot::collisione(const posizione &cella) const{
 		}
 	}
 	return false;
+}
+
+distanza calcolo_distanza(const posizione &partenza, const posizione &arrivo) {
+	return (sqrt(pow((arrivo.first - partenza.first), 2.0f) + pow((arrivo.second - partenza.second), 2.0f)));
 }

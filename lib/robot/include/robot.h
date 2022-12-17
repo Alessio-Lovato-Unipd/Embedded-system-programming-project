@@ -19,7 +19,7 @@ public:
 		- mappa riferimento: mappa alla quale riferirsi
 		- [facoltativo] raggio_robot: dimensione del robot (essendo cilindrico il raggio) in metri
 	*/
-    Robot(const posizione &robot, const posizione &obbiettivo, Mappa &mappa_riferimento, const float raggio_robot = 0.5f);
+    Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot = 0.5f);
 
 	/*Funzione per spostare il robot alla cella circostante con potenziale minore rispetto all'obbiettivo
 	  Parametri:
@@ -60,6 +60,7 @@ private:
     const double raggio_; //Dimensione del raggio del robot
     set<posizione> posizioni_precedenti; //Elenco delle posizioni precedentemente percorse dal robot
     set<posizione> celle_occupate_; //Elenco delle celle occupate dal robot
+	bool obbiettivo_stabilito_{false}; //Verifica che sia stato assegnato un obbiettivo al robot
 
 	/*Funzione per modificare le dimensioni della mappa nel caso la posizione passata per argomento
 	  non fosse già all'interno della mappa. Se le dimensioni vengono modificate, aggiungo celle ai bordi modificati.
@@ -81,13 +82,6 @@ private:
 		- arrivo: seconda posizione alla quale è riferito il potenziale
 	*/
 	float campo_repulsivo(const posizione &partenza, const posizione &arrivo) const;
-
-	/*Funzione per il calcolo della distanza euclidea tra due posizioni
-	  Parametri:
-	  	- partenza: prima posizione da cui calcolare la distanza
-		- arrivo: seconda posizione alla quale è riferita la distanza
-	*/
-    distanza calcolo_distanza(const posizione &partenza, const posizione &arrivo) const;
 
 	/*Funzione per il calcolo dell'oggetto più vicino ad una determinata posizione tra un elenco di posizioni occupate
 	  Parametri:
@@ -135,5 +129,12 @@ private:
     */
     bool collisione(const posizione &cella) const;
 };
+
+	/*Funzione per il calcolo della distanza euclidea tra due posizioni
+	  Parametri:
+	  	- partenza: prima posizione da cui calcolare la distanza
+		- arrivo: seconda posizione alla quale è riferita la distanza
+	*/
+    distanza calcolo_distanza(const posizione &partenza, const posizione &arrivo);
 
 #endif

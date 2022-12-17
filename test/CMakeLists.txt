@@ -11,7 +11,9 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 
 #Aggiunta sottocartelle dei test
 
+set(CARTELLA_TEST ${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(generazione_mappa)
+add_subdirectory(test_robot)
 
 
 

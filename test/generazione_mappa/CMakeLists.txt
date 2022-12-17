@@ -18,16 +18,10 @@ target_link_libraries(${NOME_PROGRAMMA} PRIVATE
 										mappa 
 										gnuplot)
 
-add_executable(test_robot test_aggiornamento_robot.cpp)
-target_link_libraries(test_robot PRIVATE 
-							robot
-							mappa 
-							gnuplot)
-
 #porto il file di test anche nella cartella dove genero l'eseguibile
 add_custom_command(TARGET ${NOME_PROGRAMMA} POST_BUILD        # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-		"${CMAKE_CURRENT_SOURCE_DIR}/ostacoli.csv"   # <--this is in-file
+		"${CARTELLA_TEST}/ostacoli.csv"   # <--this is in-file
         $<TARGET_FILE_DIR:${NOME_PROGRAMMA}>)                 # <--this is out-file path
 
 

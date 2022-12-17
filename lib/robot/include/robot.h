@@ -34,6 +34,13 @@ public:
 	  viene eseguito solo rispetto agli ostacoli e non ai robot.
 	*/
     mappa_potenziali calcola_potenziali_celle_adiacenti() ;
+	/*Assegno un nuovo obbiettivo al robot
+	  Parametri:
+		- nuovo_obbiettivo: nuova posizione da raggiungere (verrà normalizzata alla griglia)
+	  Output:
+		Ritorna true se è stato possibile aggiornare l'obbiettivo, altrimenti false e stampa un errore
+	*/
+	bool nuovo_obbiettivo(const posizione &nuovo_obbiettivo);
 
 	/*Funzioni accesso dati*/
 	// Ritorna l'elenco delle celle occupate dal robot

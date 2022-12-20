@@ -19,6 +19,13 @@ target_link_libraries(${NOME_PROGRAMMA} PRIVATE
 										robot
 										gnuplot
 										monitor)
+										
+add_executable(lettura_satelliti lettura_satelliti.cpp)
+target_link_libraries(lettura_satelliti PRIVATE 
+										mappa
+										robot
+										gnuplot
+										monitor)
 
 #porto il file di test anche nella cartella dove genero l'eseguibile
 add_custom_command(TARGET ${NOME_PROGRAMMA} POST_BUILD        # Adds a post-build event to MyTest

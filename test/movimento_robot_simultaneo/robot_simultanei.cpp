@@ -6,8 +6,8 @@ Gestore_robot monitor{2};
 
 void robot(int id, const posizione &posizione_robot, Mappa &mappa_riferimento, const float raggio_robot = 0.5){
 	Robot robot{monitor.crea_robot(posizione_robot, mappa_riferimento, raggio_robot)};
-	while (monitor.obbiettivi_presenti())
-	{
+	bool ho_ancora_obbiettivi{true};
+	while (ho_ancora_obbiettivi) {
 		posizione nuovo_obbiettivo{monitor.ottieni_prossimo_obbiettivo(robot.posizione_centrale())};
 		monitor.assegna_obbiettivo(robot, nuovo_obbiettivo);
 		std::osyncstream robot_a_cout(std::cout);
@@ -19,6 +19,8 @@ void robot(int id, const posizione &posizione_robot, Mappa &mappa_riferimento, c
 			robot_a_cout << "Robot " << std::to_string(id) << ": {" << robot.posizione_centrale().first << ", "
 			<< robot.posizione_centrale().second << "}" << endl;
 		}
+		if (!monitor.obbiettivi_presenti())
+			ho_ancora_obbiettivi = false;
 	}
 	std::osyncstream robot_a_cout(std::cout);
 	robot_a_cout << "Robot " << std::to_string(id) << " ha finito i task" << endl;

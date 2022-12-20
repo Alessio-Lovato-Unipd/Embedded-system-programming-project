@@ -77,13 +77,13 @@ int main(int argc, char *argv[]) {
     cout << "Minimo griglia--> x: " << griglia.posizione_minima().first << "  y: " << griglia.posizione_minima().second << endl
     << "Massimo griglia--> x: " << griglia.posizione_massima().first << "  y: " << griglia.posizione_massima().second << endl;
 
-    Robot robot1{posizione{3, -3}, posizione{20, 20}, griglia, };
-    //Robot robot2{posizione{8.3, 6.7}, posizione{23,12.7}, griglia};
+    Robot robot1{posizione{3, -3}, griglia, };
+    robot1.nuovo_obbiettivo(posizione{15, 15.6});
     griglia.stampa_mappa(argv[2]);
     stampa_gnuplot(griglia);
     while (!robot1.obbiettivo_raggiunto()) {
       mappa_potenziali posizioni_possibili{robot1.calcola_potenziali_celle_adiacenti()};
-      if (!robot1.sposta_su_cella_successiva(griglia, posizioni_possibili))
+      if (!robot1.sposta_su_cella_successiva(posizioni_possibili))
         exit(EXIT_FAILURE);
       stampa_gnuplot(griglia);
     }

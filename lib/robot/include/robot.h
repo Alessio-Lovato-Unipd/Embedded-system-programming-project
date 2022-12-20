@@ -23,18 +23,17 @@ public:
 
 	/*Funzione per spostare il robot alla cella circostante con potenziale minore rispetto all'obbiettivo
 	  Parametri:
-	  	- mappa_condivisa: mappa sulla quale fanno riferimento i robot
 		- potenziali_celle: mappa contenente le informazioni delle celle adiacenti alla posizione centrale del robot
 	  Output:
 	  	Ritorna true se il posizionamento è stato eseguito correttamente, altrimenti ritorna false e stampa l'errore
 	*/
-    bool sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle);
+    bool sposta_su_cella_successiva(mappa_potenziali &potenziali_celle);
 
 	/*Funzione per calcolare il potenziale delle celle adiacenti alla posizione centrale attuale del robot. Il calcolo
 	  viene eseguito solo rispetto agli ostacoli e non ai robot.
 	*/
     mappa_potenziali calcola_potenziali_celle_adiacenti() ;
-	/*Assegno un nuovo obbiettivo al robot
+	/*Assegno un nuovo obbiettivo al robot e nel caso aggiorno la mappa
 	  Parametri:
 		- nuovo_obbiettivo: nuova posizione da raggiungere (verrà normalizzata alla griglia)
 	  Output:
@@ -61,6 +60,7 @@ private:
     set<posizione> posizioni_precedenti; //Elenco delle posizioni precedentemente percorse dal robot
     set<posizione> celle_occupate_; //Elenco delle celle occupate dal robot
 	bool obbiettivo_stabilito_{false}; //Verifica che sia stato assegnato un obbiettivo al robot
+	Mappa &mappa_condivisa; //Riferimento a mappa condivisa da tutti i robot
 
 	/*Funzione per modificare le dimensioni della mappa nel caso la posizione passata per argomento
 	  non fosse già all'interno della mappa. Se le dimensioni vengono modificate, aggiungo celle ai bordi modificati.

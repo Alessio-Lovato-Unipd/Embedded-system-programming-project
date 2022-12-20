@@ -174,14 +174,12 @@ void Mappa::stampa_mappa(string nome_file) const {
 }
 
 void Mappa::aggiorna_mappa (const Mappa &riferimento) {
-    std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_[elemento.first] = elemento.second;});
+    std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_.insert({elemento.first, elemento.second});});
     minimo_mappa_ = riferimento.posizione_minima();
     massimo_mappa_ = riferimento.posizione_massima();
-    robot.clear();
-    std::for_each(riferimento.robot_cbegin(), riferimento.robot_cend(), [this](auto &el) {posiziona_robot_cella(el);});
 }
 
 void Mappa::aggiorna_posizione_robot_mappa (const Mappa & riferimento) {
     robot.clear();
-    std::for_each(riferimento.robot_cbegin(), riferimento.robot_cend(), [this](auto &el) {posiziona_robot_cella(el);});
+    robot = riferimento.robot;
 }

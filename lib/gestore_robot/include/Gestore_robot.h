@@ -7,7 +7,9 @@
 #include <list>
 #include <queue>
 #include <syncstream>
+#include "gnuplot.h"
 
+void stampa_gnuplot(const Mappa &map);
 
 class Gestore_robot {
 public:
@@ -31,7 +33,7 @@ public:
 
 	Robot crea_robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot);
 
-	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali);
+	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali, Mappa &mappa, const int ID);
 
 	void stampa_buffer() const;
 
@@ -49,6 +51,7 @@ private:
 	const size_t numero_massimo_obbiettivi_;
 	std::condition_variable buffer_non_vuoto;
 	std::condition_variable buffer_non_pieno;
+	std::condition_variable aggiornamento_mappa_possibile;
 };
 
 #endif

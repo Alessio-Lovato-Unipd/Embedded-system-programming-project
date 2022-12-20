@@ -13,3 +13,4 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 add_subdirectory(mappa)
 add_subdirectory(gnuplot)
 add_subdirectory(robot)
+add_subdirectory(gestore_robot)

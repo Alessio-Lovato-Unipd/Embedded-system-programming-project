@@ -51,13 +51,10 @@ Robot Gestore_robot::crea_robot(const posizione &robot, Mappa &mappa_riferimento
 	return robot_creato;
 }
 
-bool Gestore_robot::sposta_robot(Robot &robot, mappa_potenziali &potenziali, Mappa &mappa, const int ID){
+bool Gestore_robot::sposta_robot(Robot &robot, mappa_potenziali &potenziali){
 	mappa_potenziali posizioni_possibili{robot.calcola_potenziali_celle_adiacenti()};
 	std::unique_lock blocco_mappa{modifica_mappa_};
 	auto riuscita{robot.sposta_su_cella_successiva(potenziali)};
-    if (ID==1) {
-        stampa_gnuplot(mappa);
-    }
 	blocco_mappa.unlock();
 	return riuscita;
 }
@@ -70,34 +67,7 @@ void Gestore_robot::stampa_buffer() const {
     cout << endl;
 }
 
-void stampa_gnuplot(const Mappa &map) {
-    //stampa dei fati necessari per il grafico
-    std::ofstream file("gnuplot_raw.dat", std::ios::out);
-    if (!file.is_open()) {
-        std::cerr << "Impossibile stampare Mappa, il file non è presente!" << std::endl;
-        return;
-    }
-    //ciclo stampa valori
-    // 0 -> no ostacoli
-    // 1 -> ostacoli
-    // 2 -> robot
-    for (double x{map.posizione_minima().first}; x <= map.posizione_massima().first; x += map.dimensione_celle_metri()) {
-        for(double y = map.posizione_minima().second; y <= map.posizione_massima().second; y += map.dimensione_celle_metri()) {
-          	file << x << " " << y << " ";
-          	if (map.contiene_robot(posizione{x,y}))
-            	file << "2";
-          	else
-            	file << map.cella_libera(posizione{x,y});
-          	file << endl;
-        }
-        file << endl;
-    }
-
-    file.close();
-
-    //stampa grafico
-    stampa_grafico(map.posizione_minima().first - map.dimensione_mezza_cella(),map.posizione_minima().second - map.dimensione_mezza_cella(),
-                  map.posizione_massima().first + map.dimensione_mezza_cella(), map.posizione_massima().second + map.dimensione_mezza_cella(),
-                  map.dimensione_celle_metri(), gnuplot::tipo_stampa::no_persist);
-  
+std::unique_lock<std::mutex> Gestore_robot::blocca_mappa () {
+    std::unique_lock blocco(modifica_mappa_);
+    return blocco;
 }

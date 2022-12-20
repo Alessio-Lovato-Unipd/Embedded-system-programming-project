@@ -7,7 +7,6 @@
 #include <list>
 #include <queue>
 #include <syncstream>
-#include "gnuplot.h"
 
 void stampa_gnuplot(const Mappa &map);
 
@@ -33,13 +32,17 @@ public:
 
 	Robot crea_robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot);
 
-	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali, Mappa &mappa, const int ID);
+	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali);
 
 	void stampa_buffer() const;
 
 	/*Funzioni accesso dati*/
 	//Restituisce true se sono ancora presenti campioni da raccogliere
 	bool obbiettivi_presenti() const {return !obbiettivi.empty();};
+	//ritorna lucchetto mutex mappa
+	std::unique_lock<std::mutex> blocca_mappa ();
+	//sblocca lucchetto mutex mappa
+	void sblocca_mappa(std::unique_lock<std::mutex> &mutex) {mutex.unlock();};
 	/*Fine funzioni accesso dati*/
 
 

@@ -38,6 +38,7 @@ bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 	posizione nuova{nuovo_obbiettivo};
 	mappa_.centra_posizione(nuova.first, Mappa::tipo_posizione::centro);
     mappa_.centra_posizione(nuova.second, Mappa::tipo_posizione::centro);
+	mappa_.aggiorna_mappa(mappa_condivisa);
 	if (!mappa_.contiene_cella(nuova)) {
 		incrementa_mappa(nuova);
 		mappa_condivisa.aggiorna_mappa(mappa_);
@@ -165,13 +166,7 @@ bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
 		return false;
 	}
 	//scarico mappa aggiornata solo se necessario
-	if (mappa_.posizione_minima().first != mappa_condivisa.posizione_minima().first ||
-		mappa_.posizione_minima().second != mappa_condivisa.posizione_minima().second ||
-		mappa_.posizione_massima().first != mappa_condivisa.posizione_massima().first ||
-		mappa_.posizione_massima().second != mappa_condivisa.posizione_massima().second)
-	{ 
-	    mappa_.aggiorna_mappa(mappa_condivisa);
-	}
+	mappa_.aggiorna_mappa(mappa_condivisa);
 	//aggiorno posizioni robot
 	mappa_.aggiorna_posizione_robot_mappa(mappa_condivisa);
 	//cancello la mia posizione dalla mappa

@@ -174,9 +174,15 @@ void Mappa::stampa_mappa(string nome_file) const {
 }
 
 void Mappa::aggiorna_mappa (const Mappa &riferimento) {
-    std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_.insert({elemento.first, elemento.second});});
-    minimo_mappa_ = riferimento.posizione_minima();
-    massimo_mappa_ = riferimento.posizione_massima();
+    if (posizione_minima().first != riferimento.posizione_minima().first ||
+		posizione_minima().second != riferimento.posizione_minima().second ||
+		posizione_massima().first != riferimento.posizione_massima().first ||
+		posizione_massima().second != riferimento.posizione_massima().second)
+    {
+        std::for_each(riferimento.cbegin(), riferimento.cend(), [this](auto &elemento) {spazio_movimento_.insert({elemento.first, elemento.second});});
+        minimo_mappa_ = riferimento.posizione_minima();
+        massimo_mappa_ = riferimento.posizione_massima();
+    }
 }
 
 void Mappa::aggiorna_posizione_robot_mappa (const Mappa & riferimento) {

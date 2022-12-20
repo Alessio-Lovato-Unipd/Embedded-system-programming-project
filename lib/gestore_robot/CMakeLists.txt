@@ -13,8 +13,7 @@ add_library(monitor STATIC src/Gestore_robot.cpp)
 
 target_include_directories(monitor PUBLIC include)
 
-target_link_libraries(monitor PUBLIC robot
-									 gnuplot)
+target_link_libraries(monitor PUBLIC robot)
 
 add_library(lib::monitor ALIAS monitor)
 

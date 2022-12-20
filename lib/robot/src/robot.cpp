@@ -1,7 +1,7 @@
 #include "robot.h"
 
 Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot)
-	: robot_celle_{robot}, mappa_{mappa_riferimento}, raggio_{raggio_robot}
+	: robot_celle_{robot}, mappa_{mappa_riferimento}, raggio_{raggio_robot}, mappa_condivisa{mappa_riferimento}
 {
 	if (raggio_robot <= 0) {
 		std::cerr << "La dimensione del robot inserita è nulla o negativa" << std::endl;
@@ -12,9 +12,13 @@ Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggi
     mappa_.centra_posizione(robot_celle_.second, Mappa::tipo_posizione::centro);
 
 	celle_occupate_ = celle_adiacenti(robot_celle_);
+	//salvo le posizioni dei robot nella mappa locale
+	mappa_.aggiorna_posizione_robot_mappa(mappa_riferimento);
+	//inserisco le eventuali nuove celle e controllo che le posizioni occupate dal robot non siano già occupate
     for (auto &elemento : celle_occupate_) {
 			if (!mappa_.contiene_cella(elemento)) {
 				incrementa_mappa(elemento);
+				mappa_condivisa.aggiorna_mappa(mappa_);
 			} else if (!mappa_.cella_libera(elemento)) {//controllo che il robot non sia posizionato su un ostacolo
 				std::cerr << "Il robot è stato inserito in una posizione occupata da un ostacolo" << std::endl;
 				exit(EXIT_FAILURE);
@@ -22,28 +26,25 @@ Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggi
 				std::cerr << "Il robot è stato inserito in una posizione occupata da un robot" << std::endl;
 				exit(EXIT_FAILURE);
 			}
+			//inserisco la cella nell'elenco delle posizioni occupate da un robot
 			mappa_.posiziona_robot_cella(elemento);  
 	}
     
-    //attendo mutex per aggiornare mappa
-    mappa_riferimento.aggiorna_mappa(mappa_);
-    //rilascio mutex
-	//se il robot è abbastanza vicino all'ostacolo elimino la componente repulsiva del campo di forza
-	//per evitare che il robot sia respinto distante dall'obbiettivo
-	if (calcolo_distanza(obbiettivo_celle_, robot_celle_) < mappa_.distanza_minima_ostacolo())
-		mappa_.imposta_fattore_scala_repulsivo(0);
+    //aggiorno la mappa condivisa
+	mappa_condivisa.aggiorna_posizione_robot_mappa(mappa_);
 }
 
 bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 	posizione nuova{nuovo_obbiettivo};
 	mappa_.centra_posizione(nuova.first, Mappa::tipo_posizione::centro);
     mappa_.centra_posizione(nuova.second, Mappa::tipo_posizione::centro);
-	if (!mappa_.contiene_cella(nuova))
+	if (!mappa_.contiene_cella(nuova)) {
 		incrementa_mappa(nuova);
-	else if (!mappa_.cella_libera(nuova)) {//controllo che l'obbiettivo non siano in un ostacolo
+		mappa_condivisa.aggiorna_mappa(mappa_);
+	} else if (!mappa_.cella_libera(nuova)) {//controllo che l'obbiettivo non siano in un ostacolo
 		std::cerr << "L'obbiettivo è stato inserito in una posizione occupata da un ostacolo" << std::endl;
 		return false;
-    }
+	}
 	obbiettivo_celle_ = nuova;
 	obbiettivo_stabilito_ = true;
 	return true;
@@ -157,21 +158,22 @@ void Robot::aggiorna_campi_potenziale (mappa_potenziali &celle_con_potenziali) {
 	}
 }
 
-bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali &potenziali_celle){
+bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
+	//se non ho un obbiettivo assegnato non eseguo il ciclo
 	if (!obbiettivo_stabilito_) {
 		std::cerr << "Non è stato assegnato un obbiettivo al robot" << endl;
 		return false;
 	}
-	//scarico mappa aggiornata
-	if (mappa_.posizione_minima().first == mappa_condivisa.posizione_minima().first &&
-		mappa_.posizione_minima().second == mappa_condivisa.posizione_minima().second &&
-		mappa_.posizione_massima().first == mappa_condivisa.posizione_massima().first &&
-		mappa_.posizione_massima().second == mappa_condivisa.posizione_massima().second) {
-	    
-	    mappa_.aggiorna_posizione_robot_mappa(mappa_condivisa);
-	} else {
-		mappa_.aggiorna_mappa(mappa_condivisa);
+	//scarico mappa aggiornata solo se necessario
+	if (mappa_.posizione_minima().first != mappa_condivisa.posizione_minima().first ||
+		mappa_.posizione_minima().second != mappa_condivisa.posizione_minima().second ||
+		mappa_.posizione_massima().first != mappa_condivisa.posizione_massima().first ||
+		mappa_.posizione_massima().second != mappa_condivisa.posizione_massima().second)
+	{ 
+	    mappa_.aggiorna_mappa(mappa_condivisa);
 	}
+	//aggiorno posizioni robot
+	mappa_.aggiorna_posizione_robot_mappa(mappa_condivisa);
 	//cancello la mia posizione dalla mappa
 	for (auto &elemento : celle_occupate_)
 		mappa_.libera_cella_robot(elemento);
@@ -188,27 +190,31 @@ bool Robot::sposta_su_cella_successiva(Mappa &mappa_condivisa, mappa_potenziali 
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 							[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
 	}
-	//evito minimi locali o robot nelle vicinanze
+
+	//utilizzo variabile per verificare se aggiornare la posizione del robot
 	bool spostamento{true};
+	//evito minimi locali o robot nelle vicinanze
 	while (posizioni_precedenti.contains(prossima_cella) || collisione(prossima_cella)) {
 		potenziali_celle.erase(prossima_cella);
 		if (potenziali_celle.empty()) {
 				std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
 				spostamento = false;
 				break;
-			}
+		}
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 												[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
 	}
+	//se mi sposto aggiorno le posizioni occupate dal robot
 	if (spostamento) {
 		//salvo la nuova posizione
 		robot_celle_ = {prossima_cella.first, prossima_cella.second};
 		//inserisco tutte le celle occupate dal robot
 		celle_occupate_.clear();
+		celle_occupate_ = celle_adiacenti(robot_celle_);
+		for (auto &elemento : celle_occupate_)
+			mappa_.posiziona_robot_cella(elemento);
 	}
-	celle_occupate_ = celle_adiacenti(robot_celle_);
-	for (auto &elemento : celle_occupate_)
-		mappa_.posiziona_robot_cella(elemento);
+	
 	//aggiorno mappa
 	mappa_condivisa.aggiorna_posizione_robot_mappa(mappa_);
 	return spostamento;

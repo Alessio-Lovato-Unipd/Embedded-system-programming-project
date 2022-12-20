@@ -1,5 +1,6 @@
 #include "Gestore_robot.h"
 #include <thread>
+#include <chrono>
 
 Gestore_robot monitor{2};
 
@@ -9,14 +10,18 @@ void robot(int id, const posizione &posizione_robot, Mappa &mappa_riferimento, c
 	{
 		posizione nuovo_obbiettivo{monitor.ottieni_prossimo_obbiettivo(robot.posizione_centrale())};
 		monitor.assegna_obbiettivo(robot, nuovo_obbiettivo);
+		std::osyncstream robot_a_cout(std::cout);
+		cout << "Robot " << std::to_string(id) << " nuovo obbiettivo: {" << robot.obbiettivo().first <<
+		"; " << robot.obbiettivo(). second << "}" << endl;
 		while (!robot.obbiettivo_raggiunto()) {
 			mappa_potenziali posizioni_possibili{robot.calcola_potenziali_celle_adiacenti()};
-			monitor.sposta_robot(robot, posizioni_possibili);
-			std::osyncstream robot_a_cout(std::cout);
+			monitor.sposta_robot(robot, posizioni_possibili, mappa_riferimento, id);
 			robot_a_cout << "Robot " << std::to_string(id) << ": {" << robot.posizione_centrale().first << ", "
 			<< robot.posizione_centrale().second << "}" << endl;
 		}
 	}
+	std::osyncstream robot_a_cout(std::cout);
+	robot_a_cout << "Robot " << std::to_string(id) << " ha finito i task" << endl;
 }
 
 void satellite(int id, const string &file_obbiettivi) {
@@ -50,10 +55,21 @@ int main()
 {
 	const std::string file_1{"obbiettivi_1.txt"};
 	const std::string file_2{"obbiettivi_2.txt"};
+	const std::string ostacoli{"ostacoli.csv"};
+
+	Mappa mappa{ostacoli};
+	const posizione posizione_iniziale_1{1,1};
+	const posizione posizione_iniziale_2{12,7};
+	std::thread robot1{robot, 1, std::cref(posizione_iniziale_1), std::ref(mappa), 0.5};
+	std::thread robot2{robot, 2, std::cref(posizione_iniziale_2), std::ref(mappa), 0.5};
+	//std::thread output_visivo(&Gestore_robot::stampa_mappa, &monitor, std::ref(mappa));
 	std::thread sat_2{satellite, 2, file_2};
 	std::thread sat_1{satellite, 1, file_1};
+	//monitor.stampa_buffer();
 	sat_1.join();
 	sat_2.join();
-	monitor.stampa_buffer();
+	robot1.join();
+	robot2.join();
+	//output_visivo.join();
 	return 0;
 }

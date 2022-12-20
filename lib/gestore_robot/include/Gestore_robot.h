@@ -28,15 +28,38 @@ public:
 	*/
 	void aggiungi_obbiettivo(const posizione &obbiettivo);
 
+	/*Funzione per ottenere un nuovo obbiettivo per un robot
+	  Parametri:
+		- posisione_attuale_robot: posizione centrale del robot attuale in modo da
+			trovare l'obbiettivo più vicino
+	  Output:
+	  	Posizione del prossimo obbiettivo del robot
+	*/
 	posizione ottieni_prossimo_obbiettivo(const posizione &posizione_attuale_robot);
 
+	/*Funzione per creare un nuovo robot garantendo mutua esclusione dalla mappa
+	  Parametri:
+	  	- robot: posizione in cui mettere il robot
+		- mappa_riferimento: mappa condivisa da tutti i robot
+		- raggio_robot: dimensione del robot in metri
+	  Output:
+	  	Ritorna un istanza della classe Robot, ovvero un robot
+	*/
 	Robot crea_robot(const posizione &robot, Mappa &mappa_riferimento, const float raggio_robot);
 
+	/*Funzione per poter spostare il robot nella cella successiva garantendo la mutua esclusione dalla mappa
+	  Parametri:
+	  	- robot: robot che si vuole spostare di una cella
+		- potenziali: possibili celle su cui spostarsi
+	  Output:
+		Ritorna true se è stato possibile spostare il robot, altrimenti false
+	*/
 	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali);
 
-	void stampa_buffer() const;
 
 	/*Funzioni accesso dati*/
+	//Funzione per stampare il contenuto del buffer
+	void stampa_buffer() const;
 	//Restituisce true se sono ancora presenti campioni da raccogliere
 	bool obbiettivi_presenti() const {return !obbiettivi.empty();};
 	//ritorna lucchetto mutex mappa
@@ -50,11 +73,11 @@ public:
 private:
     std::mutex modifica_mappa_; //Mutex per limitare spostamento ad un solo robot alla volta
 	std::mutex accesso_buffer_; //Mutex per limitare accesso al buffer posizioni
-	std::list<posizione> obbiettivi;
-	const size_t numero_massimo_obbiettivi_;
-	std::condition_variable buffer_non_vuoto;
-	std::condition_variable buffer_non_pieno;
-	std::condition_variable aggiornamento_mappa_possibile;
+	std::list<posizione> obbiettivi; // Lista degli obbiettivi che i robot devono raggiungere
+	const size_t numero_massimo_obbiettivi_; //Numero massimo di obbiettivi che è possibile salvare nella lista
+	std::condition_variable buffer_non_vuoto; //variabile condizione per poter leggere dal buffer
+	std::condition_variable buffer_non_pieno; //variabile condizione per poter scrivere nel buffer
+	
 };
 
 #endif

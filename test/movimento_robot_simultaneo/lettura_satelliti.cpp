@@ -3,7 +3,7 @@
 #include <thread>
 #include <chrono>
 
-Gestore_robot monitor{2};
+Gestore_robot monitor{2,2};
 
 void satellite(int id, const string &file_obbiettivi) {
 	std::ifstream infile{file_obbiettivi};

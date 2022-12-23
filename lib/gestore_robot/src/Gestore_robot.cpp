@@ -1,7 +1,8 @@
 #include "Gestore_robot.h"
 
-Gestore_robot::Gestore_robot(int numero_robot, int numero_campioni_per_robot)
-				:numero_massimo_obbiettivi_{static_cast<size_t>(numero_robot * numero_campioni_per_robot)}
+Gestore_robot::Gestore_robot(int numero_robot, int numero_satelliti, int numero_campioni_per_robot)
+				:numero_massimo_obbiettivi_{static_cast<size_t>(numero_robot * numero_campioni_per_robot)},
+                 satelliti_con_obbiettivi_{numero_satelliti}
 {}
 
 bool Gestore_robot::assegna_obbiettivo(Robot &robot, const posizione &nuovo_obbiettivo) {
@@ -51,10 +52,10 @@ Robot Gestore_robot::crea_robot(const posizione &robot, Mappa &mappa_riferimento
 	return robot_creato;
 }
 
-bool Gestore_robot::sposta_robot(Robot &robot, mappa_potenziali &potenziali){
+bool Gestore_robot::sposta_robot(Robot &robot){
 	mappa_potenziali posizioni_possibili{robot.calcola_potenziali_celle_adiacenti()};
 	std::unique_lock blocco_mappa{modifica_mappa_};
-	auto riuscita{robot.sposta_su_cella_successiva(potenziali)};
+	auto riuscita{robot.sposta_su_cella_successiva(posizioni_possibili)};
 	blocco_mappa.unlock();
 	return riuscita;
 }

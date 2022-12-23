@@ -7,12 +7,12 @@
 #include <list>
 #include <queue>
 #include <syncstream>
+#include <vector>
 
-void stampa_gnuplot(const Mappa &map);
 
 class Gestore_robot {
 public:
-	Gestore_robot(int numero_robot, int numero_campioni_per_robot = 2);
+	Gestore_robot(int numero_robot, int numero_satelliti, int numero_campioni_per_robot = 2);
 	
 	/*Funzione per assegnare un nuovo obbiettivo ad un robot
 	  Parametri: 
@@ -54,7 +54,7 @@ public:
 	  Output:
 		Ritorna true se è stato possibile spostare il robot, altrimenti false
 	*/
-	bool sposta_robot(Robot &robot, mappa_potenziali &potenziali);
+	bool sposta_robot(Robot &robot);
 
 
 	/*Funzioni accesso dati*/
@@ -66,6 +66,10 @@ public:
 	std::unique_lock<std::mutex> blocca_mappa ();
 	//sblocca lucchetto mutex mappa
 	void sblocca_mappa(std::unique_lock<std::mutex> &mutex) {mutex.unlock();};
+	//elimino un satellite dal vettore, può essere invocata una sola volta per satellite
+	void fine_obbiettivi_satellite() {satelliti_con_obbiettivi_--;};
+	//ritorna true se alcuni satelliti hanno ancora dati da scrivere nel buffer
+	bool satelliti_con_dati_presenti() const {return !(satelliti_con_obbiettivi_ == 0);};
 	/*Fine funzioni accesso dati*/
 
 
@@ -77,6 +81,7 @@ private:
 	const size_t numero_massimo_obbiettivi_; //Numero massimo di obbiettivi che è possibile salvare nella lista
 	std::condition_variable buffer_non_vuoto; //variabile condizione per poter leggere dal buffer
 	std::condition_variable buffer_non_pieno; //variabile condizione per poter scrivere nel buffer
+	int satelliti_con_obbiettivi_; //array per identificare quanti satelliti hanno ancora dei dati da scrivere nel buffer
 	
 };
 

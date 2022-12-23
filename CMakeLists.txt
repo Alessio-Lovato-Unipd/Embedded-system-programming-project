@@ -10,7 +10,7 @@ project( Assegnamento_PSE_2022_2023_Lovato_Alessio
 ##########################################################################
 
 #impostazione dell tipo di compilazione da eseguire (se stable o test)
-set(TARGET_GROUP test CACHE STRING "Gruppo di sorgenti da compilare")
+set(TARGET_GROUP stable CACHE STRING "Gruppo di sorgenti da compilare")
 
 ##########################################################################
 ##########################################################################

@@ -10,6 +10,11 @@ const int pos_robot{2};
 const int ostacoli{3};
 const int obbiettivi_1{4};
 const int obbiettivi_2{5};
+const int minimo_celle{6};
+const int attrattivo{7};
+const int repulsivo{8};
+const int dist_ostacolo{9};
+const int incremento{10};
 
 //classe per salvare i dati del robot
 class dati_robot {
@@ -39,3 +44,6 @@ void stampa_gnuplot(const Mappa &map);
 
 /*Funzione per ottenere le posizioni dei robot da un file di testo*/
 std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizioni_robot);
+
+/*Funzione per creare mappa in base agli argomenti passati da main*/
+Mappa genera_mappa(int argc, char *argv[]);

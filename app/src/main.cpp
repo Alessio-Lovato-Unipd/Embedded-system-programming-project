@@ -2,23 +2,36 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 6) {
+    if (argc < 6) {
         std::cerr << "Gli argomenti passati al programma devono essere:" << endl
                   << "- dimensione celle (metri)" << endl
                   << "- file posizioni robot" << endl
                   << "- file posizioni ostacoli" << endl
                   << "- file obbiettivi satellite 1" << endl
-                  << "- file obbiettivi satellite 2" << endl;
+                  << "- file obbiettivi satellite 2" << endl
+				  << "- [facoltativo] fattore scala celle minimo (numero minimo di celle nella mappa); numero intero - default: 2" << endl
+				  << "- [facoltativo] fattore scala campo attrattivo; numero decimale  - default: 1.5" << endl
+				  << "- [facoltativo] fattore scala campo repulsivo; numero decimale - default: 100" << endl
+				  << "- [facoltativo] distanza minima ostacolo percepito; numero decimale - default: 5" << endl
+				  << "- [facoltativo] numero di celle da incrementare a bordo mappa; numero intero - default: 3" << endl;
         exit(EXIT_FAILURE);
     }
+	//controllo che la dimensione della cella sia un numero
+	try {
+		std::stod(argv[dim_celle]);
+	} catch (std::invalid_argument &err) {
+		std::cerr << "La dimensione della cella non era un numero" << endl;
+		exit (EXIT_FAILURE);
+	}
+
     //ottengo le posizioni dei robot e il numero di robot
     std::vector<dati_robot> posizioni_robot{ottieni_posizioni_robot(argv[pos_robot])};
     const size_t numero_robot{posizioni_robot.size()};
     const size_t numero_satelliti{2};
     Gestore_robot server{static_cast<int>(numero_robot), static_cast<int>(numero_satelliti)};
 
-	//genero mappa
-	Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle])};
+	//genero mappa in base agli argomenti passati al main
+	Mappa mappa{genera_mappa(argc, argv)};
 	//creo thread robot
 	std::vector<std::thread> thread_robot;
 	thread_robot.reserve(numero_robot);
@@ -154,4 +167,54 @@ std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizion
         exit(EXIT_FAILURE);
     }
     return posizioni;
+}
+
+Mappa genera_mappa(int argc, char *argv[]) {
+	if (argc ==7) {
+		try {
+			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle])};
+			return mappa;
+		} catch (std::invalid_argument &err) {
+			std::cerr << "Il fattore scala celle minimo non era un numero" << endl;
+			exit (EXIT_FAILURE);
+		}	
+	} else if (argc == 8) {
+		try {
+			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo])};
+			return mappa;
+		} catch (std::invalid_argument &err) {
+			std::cerr << "Il fattore di scala del campo attrattivo non era un numero" << endl;
+			exit (EXIT_FAILURE);
+		}	
+	} else if (argc == 9) {
+		try {
+			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
+					std::stod(argv[repulsivo])};
+			return mappa;
+		} catch (std::invalid_argument &err) {
+			std::cerr << "Il fattore di scala del campo repulsivo non era un numero" << endl;
+			exit (EXIT_FAILURE);
+		}
+	} else if (argc == 10) {
+		try {
+			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
+					std::stod(argv[repulsivo]), std::stod(argv[dist_ostacolo])};
+			return mappa;
+		} catch (std::invalid_argument &err) {
+			std::cerr << "La distanza minima a cui viene rilevato un ostacolo non era un numero" << endl;
+			exit (EXIT_FAILURE);
+		}
+	} else if (argc == 11) {
+		try {
+			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
+					std::stod(argv[repulsivo]), std::stod(argv[dist_ostacolo]), std::stoi(argv[incremento])};
+			return mappa;
+		} catch (std::invalid_argument &err) {
+			std::cerr << "Il numero di celle da incrementare a bordo mappa non era un numero" << endl;
+			exit (EXIT_FAILURE);
+		}
+	} else {
+		Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle])};
+		return mappa;
+	}
 }

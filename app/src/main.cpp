@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
                   << "- file posizioni ostacoli" << endl
                   << "- file obbiettivi satellite 1" << endl
                   << "- file obbiettivi satellite 2" << endl
+				  << "- [facoltativo] file output mappa" << endl
 				  << "- [facoltativo] fattore scala celle minimo (numero minimo di celle nella mappa); numero intero - default: 2" << endl
 				  << "- [facoltativo] fattore scala campo attrattivo; numero decimale  - default: 1.5" << endl
 				  << "- [facoltativo] fattore scala campo repulsivo; numero decimale - default: 100" << endl
@@ -39,7 +40,10 @@ int main(int argc, char *argv[])
 	    thread_robot.push_back(std::thread {robot, std::ref(server), id, posizioni_robot.at(id), std::ref(mappa)});
     //creo thread per l'output
 	bool termina_plot{false};
-    std::thread output_visivo(visualizza_mappa, std::ref(server), std::cref(mappa), std::ref(termina_plot));
+	string file_stampa;
+	if (argc > 6)
+		file_stampa = argv[percorso_mappa];
+    std::thread output_visivo(visualizza_mappa, std::ref(server), std::cref(mappa), std::ref(termina_plot), std::cref(file_stampa));
     //creo le thread dei satelliti
     std::thread sat_1{satellite, std::ref(server), 1, argv[obbiettivi_1]};
 	std::thread sat_2{satellite, std::ref(server), 2, argv[obbiettivi_2]};
@@ -105,10 +109,12 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi) 
 	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
 }
 
-void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot){
+void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot, const string &file_stampa){
 	while(!termina_plot) {
 		auto blocco{server.blocca_mappa()};
 		stampa_gnuplot(mappa);
+		if (!file_stampa.empty())
+			mappa.stampa_mappa(file_stampa);
 		server.sblocca_mappa(blocco);
 		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
@@ -170,7 +176,7 @@ std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizion
 }
 
 Mappa genera_mappa(int argc, char *argv[]) {
-	if (argc ==7) {
+	if (argc == 8) {
 		try {
 			if (std::stoi(argv[minimo_celle]) <= 0) {
 					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
@@ -182,7 +188,7 @@ Mappa genera_mappa(int argc, char *argv[]) {
 			std::cerr << "Il fattore scala celle minimo non era un numero" << endl;
 			exit (EXIT_FAILURE);
 		}	
-	} else if (argc == 8) {
+	} else if (argc == 9) {
 		try {
 			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0)) {
 					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
@@ -194,7 +200,7 @@ Mappa genera_mappa(int argc, char *argv[]) {
 			std::cerr << "Il fattore di scala del campo attrattivo non era un numero" << endl;
 			exit (EXIT_FAILURE);
 		}	
-	} else if (argc == 9) {
+	} else if (argc == 10) {
 		try {
 			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0)) {
 					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
@@ -207,7 +213,7 @@ Mappa genera_mappa(int argc, char *argv[]) {
 			std::cerr << "Il fattore di scala del campo repulsivo non era un numero" << endl;
 			exit (EXIT_FAILURE);
 		}
-	} else if (argc == 10) {
+	} else if (argc == 11) {
 		try {
 			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0) ||
 				(std::stod(argv[dist_ostacolo]) <= 0)) {
@@ -221,7 +227,7 @@ Mappa genera_mappa(int argc, char *argv[]) {
 			std::cerr << "La distanza minima a cui viene rilevato un ostacolo non era un numero" << endl;
 			exit (EXIT_FAILURE);
 		}
-	} else if (argc == 11) {
+	} else if (argc == 12) {
 		try {
 			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0) ||
 				(std::stod(argv[dist_ostacolo]) <= 0) || (std::stod(argv[incremento]) <= 0)) {

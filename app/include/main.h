@@ -10,11 +10,12 @@ const int pos_robot{2};
 const int ostacoli{3};
 const int obbiettivi_1{4};
 const int obbiettivi_2{5};
-const int minimo_celle{6};
-const int attrattivo{7};
-const int repulsivo{8};
-const int dist_ostacolo{9};
-const int incremento{10};
+const int percorso_mappa{6};
+const int minimo_celle{7};
+const int attrattivo{8};
+const int repulsivo{9};
+const int dist_ostacolo{10};
+const int incremento{11};
 
 //classe per salvare i dati del robot
 class dati_robot {
@@ -37,7 +38,7 @@ void robot(Gestore_robot &server, size_t id, dati_robot posizione_robot, Mappa &
 void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi);
 
 /*Funzione per output a schermo della mappa*/
-void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot);
+void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot, const string &file_stampa = NULL);
 
 /*Funzione per stampare i dati necessari e successivamente la mappa*/
 void stampa_gnuplot(const Mappa &map);

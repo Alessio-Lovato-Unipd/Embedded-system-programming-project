@@ -47,6 +47,7 @@ bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 		return false;
 	}
 	obbiettivo_celle_ = nuova;
+	posizioni_precedenti.clear();
 	obbiettivo_stabilito_ = true;
 	return true;
 }
@@ -180,7 +181,6 @@ bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
 	posizione prossima_cella;
 	if (potenziali_celle.contains(obbiettivo_celle_)) {
 		prossima_cella = obbiettivo_celle_;
-		obbiettivo_stabilito_ = false;
 	} else {
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 							[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;
@@ -202,12 +202,15 @@ bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
 	//se mi sposto aggiorno le posizioni occupate dal robot
 	if (spostamento) {
 		//salvo la nuova posizione
-		robot_celle_ = {prossima_cella.first, prossima_cella.second};
+		robot_celle_ = prossima_cella;
 		//inserisco tutte le celle occupate dal robot
 		celle_occupate_.clear();
 		celle_occupate_ = celle_adiacenti(robot_celle_);
 		for (auto &elemento : celle_occupate_)
 			mappa_.posiziona_robot_cella(elemento);
+		//verifico se ho raggiunto l'obbiettivo
+		if (celle_occupate_.contains(obbiettivo_celle_))
+			obbiettivo_stabilito_ = false;	
 	}
 	
 	//aggiorno mappa

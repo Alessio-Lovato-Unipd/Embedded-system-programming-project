@@ -17,7 +17,7 @@ const int repulsivo{9};
 const int dist_ostacolo{10};
 const int incremento{11};
 
-//classe per salvare i dati del robot
+//classe per salvare i dati del robot, contiene posizione e dimensione
 class dati_robot {
 public:
 	//costruttore
@@ -31,20 +31,47 @@ private:
 	float dimensione_; //raggio del robot in metri
 };
 
-/*Consumatore*/
+/*Consumatore
+  Parametri:
+  	- server: monitor per gestire le risorse comuni
+	- id: id del robot
+	- posizione del robot: classe contentente posizione del robot e dimensione
+	- mappa_riferimento: mappa condivisa da tutti i robot
+*/
 void robot(Gestore_robot &server, size_t id, dati_robot posizione_robot, Mappa &mappa_riferimento);
 
-/*Produttore*/
+/*Produttore
+  Parametri:
+  	- server: monitor per gestire le risorse comuni
+	- id: id del satellite
+	- file_obbiettivi: percorso del file dal quale ottenere gli obbiettivi
+*/
 void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi);
 
-/*Funzione per output a schermo della mappa*/
+/*Funzione per output a schermo della mappa
+  Parametri:
+  	- server: monitor per gestire le risorse comuni
+	- mappa: mappa da stampare
+	- termina_plot: booleano per terminare la funzione
+	- file_Stampa: file in cui eseguire l'output visivo senza gnuplot
+*/
 void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot, const string &file_stampa = NULL);
 
-/*Funzione per stampare i dati necessari e successivamente la mappa*/
+/*Funzione per stampare i dati necessari e successivamente la mappa
+  Parametri:
+  	- map: mappa da stampare con gnuplot
+*/
 void stampa_gnuplot(const Mappa &map);
 
-/*Funzione per ottenere le posizioni dei robot da un file di testo*/
+/*Funzione per ottenere le posizioni dei robot da un file di testo
+  Parametri:
+  	- file posizioni_robot: file dal quale ottenere i dati dei robot
+*/
 std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizioni_robot);
 
-/*Funzione per creare mappa in base agli argomenti passati da main*/
+/*Funzione per creare mappa in base agli argomenti passati da main
+  Parametri:
+  	- argc: numero di argomenti passati da terminale
+	- *argv[]: paramtri passati da terminale
+*/
 Mappa genera_mappa(int argc, char *argv[]);

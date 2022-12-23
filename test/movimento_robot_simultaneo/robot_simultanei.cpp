@@ -2,8 +2,11 @@
 #include "gnuplot.h"
 #include <thread>
 #include <chrono>
+#include <vector>
 
-Gestore_robot monitor{2};
+const int numero_robot{2};
+const int numero_satelliti{2};
+Gestore_robot monitor{numero_robot, numero_satelliti};
 
 void stampa_gnuplot(const Mappa &map) {
     //stampa dei fati necessari per il grafico
@@ -41,22 +44,17 @@ void stampa_gnuplot(const Mappa &map) {
 void robot(int id, const posizione &posizione_robot, Mappa &mappa_riferimento, const float raggio_robot = 0.5){
 	Robot robot{monitor.crea_robot(posizione_robot, mappa_riferimento, raggio_robot)};
 	bool ho_ancora_obbiettivi{true};
-	while (ho_ancora_obbiettivi) {
+	while (ho_ancora_obbiettivi || monitor.satelliti_con_dati_presenti()) {
 		posizione nuovo_obbiettivo{monitor.ottieni_prossimo_obbiettivo(robot.posizione_centrale())};
 		monitor.assegna_obbiettivo(robot, nuovo_obbiettivo);
 		std::osyncstream robot_a_cout(std::cout);
 		cout << "Robot " << std::to_string(id) << " nuovo obbiettivo: {" << robot.obbiettivo().first <<
 		"; " << robot.obbiettivo(). second << "}" << endl;
 		while (!robot.obbiettivo_raggiunto()) {
-			mappa_potenziali posizioni_possibili{robot.calcola_potenziali_celle_adiacenti()};
-			monitor.sposta_robot(robot, posizioni_possibili);
-			robot_a_cout << "Robot " << std::to_string(id) << ": {" << robot.posizione_centrale().first << ", "
+			monitor.sposta_robot(robot);
+			robot_a_cout << "Robot " << std::to_string(id) << " : {" << robot.posizione_centrale().first << ", "
 			<< robot.posizione_centrale().second << "}" << endl;
-			if (id==1) {
-				auto blocco{monitor.blocca_mappa()};
-        		stampa_gnuplot(mappa_riferimento);
-				monitor.sblocca_mappa(blocco);
-			}
+			std::this_thread::sleep_for(std::chrono::microseconds(2));
 		}
 		if (!monitor.obbiettivi_presenti())
 			ho_ancora_obbiettivi = false;
@@ -72,7 +70,8 @@ void satellite(int id, const string &file_obbiettivi) {
         double x, y;
         infile >> x >> y;
         if (infile.fail() || infile.bad()) {
-            std::cerr << "Error in input for satellite" << std::to_string(id) << endl;
+			std::osyncstream satellite_a_cerr(std::cerr);
+            satellite_a_cerr << "Errore nell'input file per il satellite" << std::to_string(id) << endl;
 			infile.close();
             break;
         }
@@ -88,7 +87,18 @@ void satellite(int id, const string &file_obbiettivi) {
 		<< std::to_string(nuovi_obbiettivi.front().first) << ", " << std::to_string(nuovi_obbiettivi.front().second) << "}" << endl;
 		nuovi_obbiettivi.pop();
 	}
+	monitor.fine_obbiettivi_satellite();
 	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
+}
+
+void visualizza_mappa(const Mappa &mappa, bool &termina_plot){
+	while(!termina_plot) {
+		auto blocco{monitor.blocca_mappa()};
+		stampa_gnuplot(mappa);
+		monitor.sblocca_mappa(blocco);
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
+	}
+	
 }
 
 
@@ -97,20 +107,23 @@ int main()
 	const std::string file_1{"obbiettivi_1.txt"};
 	const std::string file_2{"obbiettivi_2.txt"};
 	const std::string ostacoli{"ostacoli.csv"};
-
+	bool termina_plot{false};
 	Mappa mappa{ostacoli};
-	const posizione posizione_iniziale_1{1,1};
+	const posizione posizione_iniziale_1{1,10};
 	const posizione posizione_iniziale_2{12,7};
-	std::thread robot1{robot, 1, std::cref(posizione_iniziale_1), std::ref(mappa), 0.5};
-	std::thread robot2{robot, 2, std::cref(posizione_iniziale_2), std::ref(mappa), 0.5};
-	//std::thread output_visivo(&Gestore_robot::stampa_mappa, &monitor, std::ref(mappa));
+	std::vector<std::thread> thread_robot;
+	thread_robot.reserve(numero_robot);
+	thread_robot.push_back(std::thread {robot, 1, std::cref(posizione_iniziale_1), std::ref(mappa), 1});
+	thread_robot.push_back(std::thread {robot, 2, std::cref(posizione_iniziale_2), std::ref(mappa), 0.5});
+	std::thread output_visivo(&visualizza_mappa, std::ref(mappa), std::ref(termina_plot));
 	std::thread sat_2{satellite, 2, file_2};
 	std::thread sat_1{satellite, 1, file_1};
-	//monitor.stampa_buffer();
 	sat_1.join();
 	sat_2.join();
-	robot1.join();
-	robot2.join();
-	//output_visivo.join();
+	for (auto thrd{thread_robot.begin()}; thrd != thread_robot.end(); ++thrd)
+		thrd->join();
+	
+	termina_plot = true;
+	output_visivo.join();
 	return 0;
 }

@@ -172,6 +172,10 @@ std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizion
 Mappa genera_mappa(int argc, char *argv[]) {
 	if (argc ==7) {
 		try {
+			if (std::stoi(argv[minimo_celle]) <= 0) {
+					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
+					exit(EXIT_FAILURE);
+			}
 			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle])};
 			return mappa;
 		} catch (std::invalid_argument &err) {
@@ -180,6 +184,10 @@ Mappa genera_mappa(int argc, char *argv[]) {
 		}	
 	} else if (argc == 8) {
 		try {
+			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0)) {
+					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
+					exit(EXIT_FAILURE);
+			}
 			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo])};
 			return mappa;
 		} catch (std::invalid_argument &err) {
@@ -188,6 +196,10 @@ Mappa genera_mappa(int argc, char *argv[]) {
 		}	
 	} else if (argc == 9) {
 		try {
+			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0)) {
+					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
+					exit(EXIT_FAILURE);
+			}
 			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
 					std::stod(argv[repulsivo])};
 			return mappa;
@@ -197,6 +209,11 @@ Mappa genera_mappa(int argc, char *argv[]) {
 		}
 	} else if (argc == 10) {
 		try {
+			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0) ||
+				(std::stod(argv[dist_ostacolo]) <= 0)) {
+					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
+					exit(EXIT_FAILURE);
+			}
 			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
 					std::stod(argv[repulsivo]), std::stod(argv[dist_ostacolo])};
 			return mappa;
@@ -206,6 +223,11 @@ Mappa genera_mappa(int argc, char *argv[]) {
 		}
 	} else if (argc == 11) {
 		try {
+			if ((std::stoi(argv[minimo_celle]) <= 0) || (std::stod(argv[attrattivo]) <= 0) || (std::stod(argv[repulsivo]) <= 0) ||
+				(std::stod(argv[dist_ostacolo]) <= 0) || (std::stod(argv[incremento]) <= 0)) {
+					std::cerr << "Non è possibile inserire valori negativi o nulli" << endl;
+					exit(EXIT_FAILURE);
+			}
 			Mappa mappa{argv[ostacoli],std::stod(argv[dim_celle]), std::stoi(argv[minimo_celle]), std::stod(argv[attrattivo]),
 					std::stod(argv[repulsivo]), std::stod(argv[dist_ostacolo]), std::stoi(argv[incremento])};
 			return mappa;

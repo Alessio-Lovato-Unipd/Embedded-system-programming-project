@@ -105,8 +105,7 @@ std::vector<posizione> ottieni_posizioni_robot(const std::string &file_posizioni
 	std::vector<posizione> posizioni;
     while (!file.eof()) {
         double x, y;
-		float dim;
-        file >> x >> y >> dim;
+        file >> x >> y;
         if (file.fail() || file.bad()) {
 			std::osyncstream err(std::cerr);
             err << "Errore nell'input file delle posizioni dei robot" << endl;

@@ -15,6 +15,7 @@ void Rover::operator()() {
 		if (robot_.obbiettivo_raggiunto())
 			nuovo_obbiettivo();
 	}
+	while(!robot_.obbiettivo_raggiunto()) {}
 	std::osyncstream robot_a_cout(std::cout);
 	robot_a_cout << "robot " << std::to_string(id_) << " ha finito i task" << endl;
 }
@@ -27,7 +28,7 @@ void Rover::timer_callback() {
 				<< robot_.posizione_centrale().second << "}" << endl;
 				  auto message{rover_visualizer::msg::RoverPosition()};
 
- 		 message.id = id_;
+ 		message.id = id_;
   		message.position.x = robot_.posizione_centrale().first;
   		message.position.y = robot_.posizione_centrale().second;
 

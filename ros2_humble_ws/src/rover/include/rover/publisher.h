@@ -12,6 +12,9 @@
 
 // Standard dependencies
 #include <iostream>
+#include <condition_variable>
+#include <mutex>
+
 extern rclcpp::Node::SharedPtr g_node;
 extern rclcpp::Publisher<rover_visualizer::msg::RoverPosition>::SharedPtr g_publisher;
 
@@ -39,17 +42,25 @@ class Rover {
     - mappa_riferimento: mappa condivisa da tutti i robot
   */
   Rover(Gestore_robot &server, int id, const dati_robot &posizione_robot, Mappa &mappa_riferimento);
+
+  /*Funzione principale che viene eseguita quando l'oggetto
+    funzionale è usato in una thread
+  */
   void operator() ();
+
+  /* Funzione che sposta il robot di una cella e invia un messaggio
+     con topic /rover a ROS2
+  */
   void timer_callback();
 
  private:
-  rclcpp::TimerBase::SharedPtr timer_{};
-  void nuovo_obbiettivo();
+  rclcpp::TimerBase::SharedPtr timer_{}; // timer per eseguire la callback
+  void nuovo_obbiettivo(); // funzione che raggruppa le funzioni per assegnare un nuovo obbiettivo
 
-  Gestore_robot &server_;
-  int id_;
-  Mappa &mappa_;
-  Robot robot_;
+  Gestore_robot &server_; // classe monitor che gestisce i robot
+  const int id_; // id del robot
+  Mappa &mappa_; // riferimento alla mappa condivisa
+  Robot robot_; // istanza del robot
 };
 
 #endif

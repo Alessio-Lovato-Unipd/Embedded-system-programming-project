@@ -42,7 +42,7 @@ Alcuni esempi sono:
 Per poter generare i grafici, gnuplot ha bisogno di un file intermedio che viene salvato nella cartella di esecuzione dell'eseguibile con il nome di "gnuplot_raw.dat".<br />
 Questo processo è eseguito in automatico dalla funzione "stampa_gnuplot()" nel file sorgente di test.
 
-## Output testuale
+#### Output testuale
 Alcuni test e il main salvano nella cartella dell'eseguibile anche un file testuale (nel nostro caso "mappa.txt" ma il nome può essere modificato) dove viene stampata la mappa con i numeri:
 * 0 -> posizione libera
 * 1 -> nella posizione è presente un ostacolo
@@ -118,8 +118,9 @@ Per poter eseguire il codice senza utilizzare gnuplot:
 * Eliminare la riga _#include "gnuplot.h"_
 * Eliminare la riga _find_package(Gnuplot 5.2.8 REQUIRED)_ nel file test/generazione_mappa/CMakeLists.txt
 <br />
-<br />
+
 ***
+<br />
 
 ## ROS
 ### Dati rihiesti

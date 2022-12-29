@@ -59,28 +59,49 @@ Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, in
 }
 
 void Mappa::crea_set_ostacoli(std::ifstream &file){
+    string line;
    
-    while (!file.eof()) {
-		posizione min, max;
-    	file >> min.first >> min.second >> max.first >> max.second;
-    	if (file.fail() || file.bad()) {
-      		std::cerr << "Errore nel file di input \n";
-     		break;
-    	}
+    while (getline(file, line)) {
+        if (!line.empty()) {
+            try {
+                auto virgola{line.find(',')};
+                double x1{stof(line.substr(0, virgola))};
 
-        //discretizzo gli estremi dell'ostacolo in funzione della griglia
-        centra_posizione(max.first, Mappa::tipo_posizione::massimo);
-        centra_posizione(max.second, Mappa::tipo_posizione::massimo);
-        centra_posizione(min.first, Mappa::tipo_posizione::minimo);
-        centra_posizione(min.second, Mappa::tipo_posizione::minimo);
+                auto virgola_successiva{line.find(',', virgola + 1)};
+                double y1{stof(line.substr(virgola + 1, virgola_successiva))};
 
-        //inserisco tutte le celle che rappresentano l'ostacolo nel set dedicato agli ostacoli
-        for (posizione pos{min}; pos.first <= max.first; pos.first += dimensione_celle_metri_) {
-        	while (pos.second <= max.second) {
-                ostacoli.insert(pos);
-                pos.second += dimensione_celle_metri_;
+                virgola = line.find(',', virgola_successiva + 1);
+                double x2{stof(line.substr(virgola_successiva + 1, virgola))};
+
+                virgola_successiva = line.find(',', virgola + 1);
+                double y2{stof(line.substr(virgola + 1, virgola_successiva))};
+
+                //verifica dimensione valori
+                posizione x{std::minmax(x1,x2)};
+                posizione y{std::minmax(y1,y2)};
+
+                //calcolo i punti estrmi dell'ostacolo
+                posizione max{x.second, y.second};
+                posizione min{x.first, y.first};
+
+                //discretizzo gli estremi dell'ostacolo in funzione della griglia
+                centra_posizione(max.first, Mappa::tipo_posizione::massimo);
+                centra_posizione(max.second, Mappa::tipo_posizione::massimo);
+                centra_posizione(min.first, Mappa::tipo_posizione::minimo);
+                centra_posizione(min.second, Mappa::tipo_posizione::minimo);
+
+                //inserisco tutte le celle che rappresentano l'ostacolo nel set dedicato agli ostacoli
+                for (posizione pos{min}; pos.first <= max.first; pos.first += dimensione_celle_metri_) {
+                    while (pos.second <= max.second) {
+                        ostacoli.insert(pos);
+                        pos.second += dimensione_celle_metri_;
+                    }
+                    pos.second = min.second;
+                }
+            } catch (std::invalid_argument &e) {
+                std::cerr << "Inserito un valore nullo o non numerico" << endl;
+                exit(EXIT_FAILURE);
             }
-            pos.second = min.second;
         }
     }
 

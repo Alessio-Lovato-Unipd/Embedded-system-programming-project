@@ -37,9 +37,12 @@ void Rover::timer_callback() {
 }
 
 void Rover::nuovo_obbiettivo() {
-	posizione nuovo_obbiettivo{server_.ottieni_prossimo_obbiettivo(robot_.posizione_centrale())};
-	server_.assegna_obbiettivo(robot_, nuovo_obbiettivo);
-	std::osyncstream robot_a_cout(std::cout);
-	robot_a_cout << "Robot " << std::to_string(id_) << " nuovo obbiettivo: {" << robot_.obbiettivo().first <<
-	"; " << robot_.obbiettivo(). second << "}" << endl;
+	//controllo aggiuntivo nel caso si abbia un cambio di contesto durante la chiamata della funzione
+	if (server_.obbiettivi_presenti() || server_.satelliti_con_dati_presenti()) {
+		posizione nuovo_obbiettivo{server_.ottieni_prossimo_obbiettivo(robot_.posizione_centrale())};
+		server_.assegna_obbiettivo(robot_, nuovo_obbiettivo);
+		std::osyncstream robot_a_cout(std::cout);
+		robot_a_cout << "Robot " << std::to_string(id_) << " nuovo obbiettivo: {" << robot_.obbiettivo().first <<
+		"; " << robot_.obbiettivo(). second << "}" << endl;
+	}
 }

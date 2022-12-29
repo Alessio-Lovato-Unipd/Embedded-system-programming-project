@@ -12,16 +12,17 @@
 
 //costanti che rappresentano l'ordine degli argomenti da passare al main
 const int dim_celle{1};
-const int pos_robot{2};
-const int ostacoli{3};
-const int obbiettivi_1{4};
-const int obbiettivi_2{5};
-const int percorso_mappa{6};
-const int minimo_celle{7};
-const int attrattivo{8};
-const int repulsivo{9};
-const int dist_ostacolo{10};
-const int incremento{11};
+const int dim_robot{2};
+const int pos_robot{3};
+const int ostacoli{4};
+const int obbiettivi_1{5};
+const int obbiettivi_2{6};
+const int percorso_mappa{7};
+const int minimo_celle{8};
+const int attrattivo{9};
+const int repulsivo{10};
+const int dist_ostacolo{11};
+const int incremento{12};
 
 /*Produttore
   Parametri:
@@ -35,7 +36,7 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi);
   Parametri:
   	- file posizioni_robot: file dal quale ottenere i dati dei robot
 */
-std::vector<dati_robot> ottieni_posizioni_robot(const std::string &file_posizioni_robot);
+std::vector<posizione> ottieni_posizioni_robot(const std::string &file_posizioni_robot);
 
 /*Funzione per creare mappa in base agli argomenti passati da main
   Parametri:

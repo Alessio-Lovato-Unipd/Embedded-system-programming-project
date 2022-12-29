@@ -154,26 +154,26 @@ Alcuni esempi sono:
 6,2 8 _<--posizione 3: errore, non possono essere usate virgole_<br />
 
 ### Compilazione
-1 ) Posizionarsi all'interno della cartella ros2_humble_ws </br />
-2 ) Eseguire il comando _source /opt/ros/humble/setup.bash_</br />
-2 ) Eseguire il comando _colcon build --symlink-install_</br />
+1 ) Posizionarsi all'interno della cartella ros2_humble_ws <br />
+2 ) Eseguire il comando _source /opt/ros/humble/setup.bash_<br />
+2 ) Eseguire il comando _colcon build --symlink-install_<br />
 
 ### Esecuzione
-1 ) All'interno della cartella 'ros2_humbre_ws' eseguire il comando *source install/local_setup.bash*</br />
-2 ) Eseguire il comando _source /opt/ros/humble/setup.bash_</br />
-4 ) All'interno del file *rover_visualizer/launch/rviz_launch.py* cambiare i parametri con i dati corretti</br />
-4 ) Eseguire il comando *ros2 launch rover_visualizer rviz_launch.py*</br />
-5 ) Eseguire il comando *ros2 run rover rover [args]*</br />
-</tab />Dove args sono:</br/>
-</tab /></sp/>5.1 ) Dimensione celle in metri<br />
-</tab /></sp/>5.2 ) Dimensione del raggio del robot in metri<br />
-</tab /></sp/>5.3 ) Percorso del file delle posizioni dei robot<br />
-</tab /></sp/>5.4 ) Percorso del file delle posizioni degli ostacoli<br />
-</tab /></sp/>5.5 ) Percorso del file degli obbiettivi del primo satellite<br />
-</tab /></sp/>5.6 ) Percorso del file degli obbiettivi del secondo satellite<br />
-</tab /></sp/>5.7 ) [facolattivo] Percorso del file di output della griglia<br />
-</tab /></sp/>5.8 ) [facoltativo] Fattore minimo delle celle (numero minimo di celle nella mappa); numero intero _- default: 2_<br />
-</tab /></sp/>5.9 ) [facoltativo] Fattore scala del campo attrattivo; numero decimale  _- default: 1.5_<br />
-</tab /></sp/>5.10 ) [facoltativo] Fattore scala del campo repulsivo; numero decimale  _- default: 100_<br />
-</tab /></sp/>5.11 ) [facoltativo] distanza minima percezione dell'ostacolo; numero decimale _- default: 5_<br />
-</tab /></sp/>5.12 ) [facoltativo] numero di celle da incrementare a bordo mappa; numero intero _- default: 3_<br />
+1 ) All'interno della cartella 'ros2_humbre_ws' eseguire il comando *source install/local_setup.bash*<br />
+2 ) Eseguire il comando _source /opt/ros/humble/setup.bash_<br />
+4 ) All'interno del file *rover_visualizer/launch/rviz_launch.py* cambiare i parametri con i dati corretti<br />
+4 ) Eseguire il comando *ros2 launch rover_visualizer rviz_launch.py*<br />
+5 ) Eseguire il comando *ros2 run rover rover [args]*<br />
+<tab />Dove args sono:<br/>
+<tab /><sp/>5.1 ) Dimensione celle in metri<br />
+<tab /><sp/>5.2 ) Dimensione del raggio del robot in metri<br />
+<tab /><sp/>5.3 ) Percorso del file delle posizioni dei robot<br />
+<tab /><sp/>5.4 ) Percorso del file delle posizioni degli ostacoli<br />
+<tab /><sp/>5.5 ) Percorso del file degli obbiettivi del primo satellite<br />
+<tab /><sp/>5.6 ) Percorso del file degli obbiettivi del secondo satellite<br />
+<tab /><sp/>5.7 ) [facolattivo] Percorso del file di output della griglia<br />
+<tab /><sp/>5.8 ) [facoltativo] Fattore minimo delle celle (numero minimo di celle nella mappa); numero intero _- default: 2_<br />
+<tab /><sp/>5.9 ) [facoltativo] Fattore scala del campo attrattivo; numero decimale  _- default: 1.5_<br />
+<tab /><sp/>5.10 ) [facoltativo] Fattore scala del campo repulsivo; numero decimale  _- default: 100_<br />
+<tab /><sp/>5.11 ) [facoltativo] distanza minima percezione dell'ostacolo; numero decimale _- default: 5_<br />
+<tab /><sp/>5.12 ) [facoltativo] numero di celle da incrementare a bordo mappa; numero intero _- default: 3_<br />

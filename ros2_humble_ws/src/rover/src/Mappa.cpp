@@ -61,13 +61,12 @@ Mappa::Mappa(string percorso_file_ostacoli, double dimensione_celle_in_metri, in
 void Mappa::crea_set_ostacoli(std::ifstream &file){
    
     while (!file.eof()) {
-		posizione min, max;
-    	file >> min.first >> min.second >> max.first >> max.second;
     	if (file.fail() || file.bad()) {
       		std::cerr << "Errore nel file di input \n";
      		break;
-    	}
-
+        }
+        posizione min, max;
+    	file >> min.first >> min.second >> max.first >> max.second;
         //discretizzo gli estremi dell'ostacolo in funzione della griglia
         centra_posizione(max.first, Mappa::tipo_posizione::massimo);
         centra_posizione(max.second, Mappa::tipo_posizione::massimo);

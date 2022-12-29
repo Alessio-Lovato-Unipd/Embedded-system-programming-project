@@ -44,6 +44,7 @@ class Rover {
 
  private:
   rclcpp::TimerBase::SharedPtr timer_{};
+  void nuovo_obbiettivo();
 
   Gestore_robot &server_;
   int id_;

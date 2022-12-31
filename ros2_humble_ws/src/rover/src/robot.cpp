@@ -48,6 +48,8 @@ bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 	}
 	obbiettivo_celle_ = nuova;
 	posizioni_precedenti.clear();
+	//aggiorno il valore nel caso fosse stato annullato per la vicinanza dell'ostacolo
+	mappa_.imposta_fattore_scala_repulsivo(mappa_condivisa.fattore_scala_campo_repulsivo());
 	obbiettivo_stabilito_ = true;
 	return true;
 }

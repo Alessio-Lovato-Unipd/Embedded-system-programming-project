@@ -64,10 +64,18 @@ void robot(Gestore_robot &server, size_t id, dati_robot posizione_robot, Mappa &
 	bool ho_ancora_obbiettivi{true};
 	while (ho_ancora_obbiettivi || server.satelliti_con_dati_presenti()) {
 		posizione nuovo_obbiettivo{server.ottieni_prossimo_obbiettivo(robot.posizione_centrale())};
-		server.assegna_obbiettivo(robot, nuovo_obbiettivo);
 		std::osyncstream robot_a_cout(std::cout);
-		cout << "Robot " << std::to_string(id) << " nuovo obbiettivo: {" << robot.obbiettivo().first <<
-		"; " << robot.obbiettivo(). second << "}" << endl;
+		//controllo se ho un nuovo obbiettivo ed eventualmente lo assegno
+		if (nuovo_obbiettivo.first == robot_.posizione_centrale().first && nuovo_obbiettivo.second == robot_.posizione_centrale().second) {
+			server_.assegna_obbiettivo(robot_, nuovo_obbiettivo);
+		} else if (server_.assegna_obbiettivo(robot_, nuovo_obbiettivo)) {
+				robot_a_cout << "Robot " << std::to_string(id_) << " nuovo obbiettivo: {" << robot_.obbiettivo().first <<
+				"; " << robot_.obbiettivo(). second << "}" << endl;
+		} else {
+			robot_a_cout << "Obbiettivo {" << nuovo_obbiettivo.first <<
+			"; " << nuovo_obbiettivo.second << "} non valido, posizionato sopra un ostacolo" << endl;
+		}
+		//sposto il robot
 		while (!robot.obbiettivo_raggiunto()) {
 			server.sposta_robot(robot);
 			robot_a_cout << "Robot " << std::to_string(id) << " : {" << robot.posizione_centrale().first << ", "
@@ -106,6 +114,8 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi) 
 		nuovi_obbiettivi.pop();
 	}
 	server.fine_obbiettivi_satellite();
+	//Nel caso non ci fossero obbiettivi nei file, avvio i robot in modo che concludano thread
+	server.attiva_robot();
 	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
 }
 

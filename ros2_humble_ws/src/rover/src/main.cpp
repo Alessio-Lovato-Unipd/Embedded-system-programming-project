@@ -97,6 +97,8 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi) 
 		nuovi_obbiettivi.pop();
 	}
 	server.fine_obbiettivi_satellite();
+	//Nel caso non ci fossero obbiettivi nei file, avvio i robot in modo che concludano thread
+	server.attiva_robot();
 	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
 }
 

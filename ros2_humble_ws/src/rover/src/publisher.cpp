@@ -15,6 +15,7 @@ void Rover::operator()() {
 		if (robot_.obbiettivo_raggiunto())
 			nuovo_obbiettivo();
 	}
+	//attendo che venga effettuato lo spostamento all'ultimo obbiettivo
 	while(!robot_.obbiettivo_raggiunto()) {}
 	std::osyncstream robot_a_cout(std::cout);
 	robot_a_cout << "robot " << std::to_string(id_) << " ha finito i task" << endl;
@@ -40,9 +41,15 @@ void Rover::nuovo_obbiettivo() {
 	//controllo aggiuntivo nel caso si abbia un cambio di contesto durante la chiamata della funzione
 	if (server_.obbiettivi_presenti() || server_.satelliti_con_dati_presenti()) {
 		posizione nuovo_obbiettivo{server_.ottieni_prossimo_obbiettivo(robot_.posizione_centrale())};
-		server_.assegna_obbiettivo(robot_, nuovo_obbiettivo);
 		std::osyncstream robot_a_cout(std::cout);
-		robot_a_cout << "Robot " << std::to_string(id_) << " nuovo obbiettivo: {" << robot_.obbiettivo().first <<
-		"; " << robot_.obbiettivo(). second << "}" << endl;
+		if (nuovo_obbiettivo.first == robot_.posizione_centrale().first && nuovo_obbiettivo.second == robot_.posizione_centrale().second) {
+			server_.assegna_obbiettivo(robot_, nuovo_obbiettivo);
+		} else if (server_.assegna_obbiettivo(robot_, nuovo_obbiettivo)) {
+				robot_a_cout << "Robot " << std::to_string(id_) << " nuovo obbiettivo: {" << robot_.obbiettivo().first <<
+				"; " << robot_.obbiettivo(). second << "}" << endl;
+		} else {
+			robot_a_cout << "Obbiettivo {" << nuovo_obbiettivo.first <<
+			"; " << nuovo_obbiettivo.second << "} non valido, posizionato sopra un ostacolo" << endl;
+		}
 	}
 }

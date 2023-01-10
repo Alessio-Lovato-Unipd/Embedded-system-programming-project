@@ -10,8 +10,7 @@ bool Gestore_robot::assegna_obbiettivo(Robot &robot, const posizione &nuovo_obbi
     bool assegnazione_riuscita{robot.nuovo_obbiettivo(nuovo_obbiettivo)};
 	blocco_mappa.unlock();
     buffer_non_pieno.notify_one();
-    if (!obbiettivi.empty())
-        buffer_non_vuoto.notify_one();
+    buffer_non_vuoto.notify_one();
     return assegnazione_riuscita;
 }
 
@@ -20,6 +19,8 @@ posizione Gestore_robot::ottieni_prossimo_obbiettivo(const posizione &posizione_
     while (obbiettivi.empty()) {
         std::cout << "Attendo che vengano caricati degli obbiettivi \n";
         buffer_non_vuoto.wait(blocco_buffer);
+        if (!satelliti_con_dati_presenti())
+            return posizione_attuale_robot;
     }
     //calcolo l'obbiettivo con distanza minima
     auto nuovo_obbiettivo{std::min_element(obbiettivi.cbegin(), obbiettivi.cend(),

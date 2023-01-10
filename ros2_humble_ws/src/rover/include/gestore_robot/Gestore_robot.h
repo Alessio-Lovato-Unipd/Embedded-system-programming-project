@@ -55,7 +55,10 @@ public:
 		Ritorna true se è stato possibile spostare il robot, altrimenti false
 	*/
 	bool sposta_robot(Robot &robot);
-
+	
+	/*Funzione per attivare un robot che attende i dati
+	*/
+	void attiva_robot() {buffer_non_vuoto.notify_one();};
 
 	/*Funzioni accesso dati*/
 	//Funzione per stampare il contenuto del buffer

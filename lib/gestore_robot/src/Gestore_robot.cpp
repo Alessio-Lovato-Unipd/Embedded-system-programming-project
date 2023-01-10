@@ -17,7 +17,8 @@ bool Gestore_robot::assegna_obbiettivo(Robot &robot, const posizione &nuovo_obbi
 posizione Gestore_robot::ottieni_prossimo_obbiettivo(const posizione &posizione_attuale_robot) {
 	std::unique_lock blocco_buffer{accesso_buffer_};
     while (obbiettivi.empty()) {
-        std::cout << "Attendo che vengano caricati degli obbiettivi \n";
+        std::osyncstream robot_a_cout(std::cout);
+        robot_a_cout << "Attendo che vengano caricati degli obbiettivi \n";
         buffer_non_vuoto.wait(blocco_buffer);
         if (!satelliti_con_dati_presenti())
             return posizione_attuale_robot;
@@ -36,7 +37,8 @@ posizione Gestore_robot::ottieni_prossimo_obbiettivo(const posizione &posizione_
 void Gestore_robot::aggiungi_obbiettivo(const posizione &obbiettivo) {
     std::unique_lock blocca_buffer(accesso_buffer_);
     while (obbiettivi.size() == numero_massimo_obbiettivi_) {
-        std::cout << "Attendo che vengano eliminati degli obbiettivi" << endl;
+        std::osyncstream satellite_a_cout(std::cout);
+        satellite_a_cout << "Attendo che vengano eliminati degli obbiettivi" << endl;
         buffer_non_pieno.wait(blocca_buffer);
     }
     obbiettivi.push_back(obbiettivo);

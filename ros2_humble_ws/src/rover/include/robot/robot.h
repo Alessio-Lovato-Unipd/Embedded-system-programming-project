@@ -4,6 +4,8 @@
 // Internal dependencies
 #include "mappa/Mappa.h"
 
+//Default dependencies
+#include <syncstream>
 
 typedef float distanza;
 //first == distanza, second == potenziale

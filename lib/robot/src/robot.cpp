@@ -4,7 +4,8 @@ Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggi
 	: robot_celle_{robot}, mappa_{mappa_riferimento}, raggio_{raggio_robot}, mappa_condivisa{mappa_riferimento}
 {
 	if (raggio_robot <= 0) {
-		std::cerr << "La dimensione del robot inserita è nulla o negativa" << std::endl;
+		std::osyncstream err(std::cerr);
+		err << "La dimensione del robot inserita è nulla o negativa" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	//localizzo robot nelle celle
@@ -20,10 +21,12 @@ Robot::Robot(const posizione &robot, Mappa &mappa_riferimento, const float raggi
 				incrementa_mappa(elemento);
 				mappa_condivisa.aggiorna_mappa(mappa_);
 			} else if (!mappa_.cella_libera(elemento)) {//controllo che il robot non sia posizionato su un ostacolo
-				std::cerr << "Il robot è stato inserito in una posizione occupata da un ostacolo" << std::endl;
+				std::osyncstream err(std::cerr);
+            	err << "Il robot è stato inserito in una posizione occupata da un ostacolo" << std::endl;
 				exit(EXIT_FAILURE);
 			} else if (mappa_.contiene_robot(elemento)) {//controllo che il robot non venga posizionato su un altro robot
-				std::cerr << "Il robot è stato inserito in una posizione occupata da un robot" << std::endl;
+				std::osyncstream err(std::cerr);
+            	err << "Il robot è stato inserito in una posizione occupata da un robot" << std::endl;
 				exit(EXIT_FAILURE);
 			}
 			//inserisco la cella nell'elenco delle posizioni occupate da un robot
@@ -43,7 +46,8 @@ bool Robot::nuovo_obbiettivo(const posizione &nuovo_obbiettivo){
 		incrementa_mappa(nuova);
 		mappa_condivisa.aggiorna_mappa(mappa_);
 	} else if (!mappa_.cella_libera(nuova)) {//controllo che l'obbiettivo non siano in un ostacolo
-		std::cerr << "L'obbiettivo è stato inserito in una posizione occupata da un ostacolo" << std::endl;
+		std::osyncstream err(std::cerr);
+        err << "L'obbiettivo è stato inserito in una posizione occupata da un ostacolo" << std::endl;
 		return false;
 	}
 	obbiettivo_celle_ = nuova;
@@ -165,7 +169,8 @@ void Robot::aggiorna_campi_potenziale (mappa_potenziali &celle_con_potenziali) {
 bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
 	//se non ho un obbiettivo assegnato non eseguo il ciclo
 	if (!obbiettivo_stabilito_) {
-		std::cerr << "Non è stato assegnato un obbiettivo al robot" << endl;
+		std::osyncstream err(std::cerr);
+        err << "Non è stato assegnato un obbiettivo al robot" << endl;
 		return false;
 	}
 	//scarico mappa aggiornata solo se necessario
@@ -194,9 +199,10 @@ bool Robot::sposta_su_cella_successiva(mappa_potenziali &potenziali_celle){
 	while (posizioni_precedenti.contains(prossima_cella) || collisione(prossima_cella)) {
 		potenziali_celle.erase(prossima_cella);
 		if (potenziali_celle.empty()) {
-				std::cerr << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
-				spostamento = false;
-				break;
+			std::osyncstream err(std::cerr);
+            err << "Ci troviamo in un minimo locale, non è possibile muoversi" << endl;
+			spostamento = false;
+			break;
 		}
 		prossima_cella = std::min_element(potenziali_celle.cbegin(), potenziali_celle.cend(),
 												[](auto &lhs, auto &rhs) { return lhs.second.second < rhs.second.second;})->first;

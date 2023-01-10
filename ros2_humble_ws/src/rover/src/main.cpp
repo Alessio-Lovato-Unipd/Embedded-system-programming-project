@@ -99,7 +99,8 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi) 
 	server.fine_obbiettivi_satellite();
 	//Nel caso non ci fossero obbiettivi nei file, avvio i robot in modo che concludano thread
 	server.attiva_robot();
-	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
+	std::osyncstream satellite_a_cout(std::cout);
+	satellite_a_cout << "Finita scrittura satellite " << std::to_string(id) << endl;
 }
 
 std::vector<posizione> ottieni_posizioni_robot(const std::string &file_posizioni_robot) {

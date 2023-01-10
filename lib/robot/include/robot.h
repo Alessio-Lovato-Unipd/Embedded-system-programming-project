@@ -2,7 +2,7 @@
 #define ROBOT_H
 
 #include "Mappa.h"
-#include <iostream>
+#include <syncstream>
 
 typedef float distanza;
 //first == distanza, second == potenziale

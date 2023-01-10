@@ -116,7 +116,8 @@ void satellite(Gestore_robot &server, size_t id, const string &file_obbiettivi) 
 	server.fine_obbiettivi_satellite();
 	//Nel caso non ci fossero obbiettivi nei file, avvio i robot in modo che concludano thread
 	server.attiva_robot();
-	std::cout << "Finita scrittura satellite " << std::to_string(id) << endl;
+	std::osyncstream satellite_a_cout(std::cout);
+	satellite_a_cout << "Finita scrittura satellite " << std::to_string(id) << endl;
 }
 
 void visualizza_mappa(Gestore_robot &server, const Mappa &mappa, bool &termina_plot, const string &file_stampa){
